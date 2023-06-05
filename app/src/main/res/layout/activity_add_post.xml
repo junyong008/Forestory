@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="addPostViewModel"
+            type="com.yjy.forestory.feature.post.AddPostViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:text="스토리 추가"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/view"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ibutton_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ripple_effect"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_close" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="60dp"
+            android:background="@color/gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:overScrollMode="never"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                tools:context=".feature.post.AddPostActivity">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/ibutton_addPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/button_lightgray_round"
+                    android:padding="500dp"
+                    android:clipToOutline="true"
+                    android:onClick="@{() -> addPostViewModel.addPhoto()}"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_addphoto" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipgroup_tags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:alignContent="space_around"
+                    app:alignItems="stretch"
+                    app:flexWrap="wrap"
+                    chips="@{addPostViewModel.tagList}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ibutton_addPhoto"
+                    app:showDivider="beginning|middle|end">
+                </com.google.android.material.chip.ChipGroup>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_tag"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/edit_circle_border"
+                    android:gravity="top"
+                    android:hint='@{"태그 입력 (최대 " + addPostViewModel.MAX_TAG_COUNT + " 개)"}'
+                    android:maxLength="20"
+                    android:paddingStart="60dp"
+                    android:paddingEnd="15dp"
+                    android:paddingVertical="15dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:text="@{addPostViewModel.tagText}"
+                    android:onTextChanged="@{(text, start, before, count) -> addPostViewModel.onTagTextChanged(text)}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/chipgroup_tags" />
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="18dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/bg_lightgray_circle"
+                    app:layout_constraintBottom_toBottomOf="@+id/edit_tag"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/edit_tag"
+                    app:srcCompat="@drawable/ic_hashtag" />
+
+                <View
+                    android:id="@+id/view2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/gray"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/edit_tag" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edit_round_border"
+                    android:gravity="top"
+                    android:hint="내용을 입력하세요"
+                    android:inputType="textMultiLine"
+                    android:maxLength="1000"
+                    android:minHeight="80dp"
+                    android:padding="15dp"
+                    android:text="@={addPostViewModel.contentText}"
+                    android:textColor="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_addpost"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@drawable/button_green_round"
+                    android:elevation="9dp"
+                    android:fontFamily="@font/kjcgothic_bold"
+                    android:text="작성하기"
+                    android:textColor="@color/white"
+                    android:enabled="@{addPostViewModel.isReadyToPost}"
+                    android:onClick="@{() -> addPostViewModel.addPost()}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/edit_content" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
