@@ -1,0 +1,28 @@
+<resources>
+
+    <!-- 커스텀 토스트 : https://github.com/Muddz/StyleableToast -->
+    <style name="errorToast">
+        <item name="stTextBold">true</item>
+        <item name="stTextColor">#FFFFFF</item>
+        <item name="stTextSize">14sp</item>
+        <item name="stColorBackground">#000000</item>
+        <item name="stStrokeWidth">3dp</item>
+        <item name="stStrokeColor">#000000</item>
+        <item name="stIconStart">@drawable/ic_error</item>
+        <item name="stLength">SHORT</item>
+        <item name="stRadius">10dp</item>
+    </style>
+
+    <style name="successToast">
+        <item name="stTextBold">true</item>
+        <item name="stTextColor">#FFFFFF</item>
+        <item name="stTextSize">14sp</item>
+        <item name="stColorBackground">#000000</item>
+        <item name="stStrokeWidth">3dp</item>
+        <item name="stStrokeColor">#000000</item>
+        <item name="stIconStart">@drawable/ic_success</item>
+        <item name="stLength">SHORT</item>
+        <item name="stRadius">10dp</item>
+    </style>
+
+</resources>

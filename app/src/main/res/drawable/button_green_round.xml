@@ -1,0 +1,34 @@
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#000000">
+    <item android:id="@android:id/background">
+        <selector xmlns:android="http://schemas.android.com/apk/res/android" android:id="@android:id/background">
+
+            <item android:state_enabled="true">
+                <shape xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:padding="10dp"
+                    android:shape="rectangle">
+
+                    <solid android:color="@color/green"></solid>
+                    <corners
+                        android:topLeftRadius="12dp"
+                        android:topRightRadius="12dp"
+                        android:bottomLeftRadius="12dp"
+                        android:bottomRightRadius="12dp"/>
+                </shape>
+            </item>
+
+            <item android:state_enabled="false">
+                <shape xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:padding="10dp"
+                    android:shape="rectangle">
+
+                    <solid android:color="@color/gray"></solid>
+                    <corners
+                        android:topLeftRadius="12dp"
+                        android:topRightRadius="12dp"
+                        android:bottomLeftRadius="12dp"
+                        android:bottomRightRadius="12dp"/>
+                </shape>
+            </item>
+        </selector>
+    </item>
+</ripple>
