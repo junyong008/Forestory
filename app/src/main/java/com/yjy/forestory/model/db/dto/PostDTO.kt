@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 data class PostDTO(
     val image: Bitmap,
     val content: String,
-    val tagList: List<String>
+    val tagList: List<String>?
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null

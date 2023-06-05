@@ -24,13 +24,13 @@ class Converter {
 
     // List<String>(실사용) <-> String(DB) 변환
     @TypeConverter
-    fun fromList(list: List<String>): String {
+    fun fromList(list: List<String>?): String {
         val gson = Gson()
         return gson.toJson(list)
     }
 
     @TypeConverter
-    fun toList(string: String): List<String> {
+    fun toList(string: String): List<String>? {
         val gson = Gson()
         val type = object : TypeToken<List<String>>() {}.type
         return gson.fromJson(string, type)
