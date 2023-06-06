@@ -16,6 +16,7 @@ import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.util.*
 import javax.inject.Inject
 
 
@@ -218,10 +219,10 @@ class AddPostViewModel @Inject constructor(
     fun addPost() {
         _isLoading.value = true
         viewModelScope.launch {
-            val inputImage: Bitmap? = imageUtils.uriToBitmap(_currentPhoto.value!!)
+            val inputImage: Bitmap? = imageUtils.uriToCompressedBitmap(_currentPhoto.value!!, 80)
 
             if (inputImage != null) {
-                val post = PostDTO(inputImage!!, contentText.value!!, tagList.value)
+                val post = PostDTO(inputImage!!, contentText.value!!, tagList.value, Date())
                 postRepository.insert(post)
 
                 _isLoading.value = false

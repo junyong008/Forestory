@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -32,10 +34,19 @@ class ImageUtils @Inject constructor(private val contentResolver: ContentResolve
         return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
     }
 
-    fun uriToBitmap(uri: Uri): Bitmap? {
+    fun uriToCompressedBitmap(uri: Uri, quality: Int): Bitmap? {
         val inputStream = contentResolver.openInputStream(uri)
-        return inputStream?.use {
+        val bitmap = inputStream?.use {
             BitmapFactory.decodeStream(it)
         }
+
+        // 비트맵을 JPEG로 압축하여 파일 크기를 줄임
+        val outputStream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+
+        // 압축된 이미지를 다시 로드하여 최종 비트맵 반환
+        val compressedBitmap = BitmapFactory.decodeStream(ByteArrayInputStream(outputStream.toByteArray()))
+
+        return compressedBitmap
     }
 }
