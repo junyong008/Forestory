@@ -72,7 +72,6 @@
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/button_lightgray_round"
-                    android:padding="500dp"
                     android:clipToOutline="true"
                     android:onClick="@{() -> addPostViewModel.addPhoto()}"
                     app:layout_constraintDimensionRatio="1:1"

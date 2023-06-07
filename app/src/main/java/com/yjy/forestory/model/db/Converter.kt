@@ -1,26 +1,21 @@
 package com.yjy.forestory.model.db
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.ByteArrayOutputStream
 import java.util.*
 
 class Converter {
 
-    // Bitmap(실사용) <-> ByteArray(DB) 변환
+    // Uri(실사용) <-> String(DB) 변환
     @TypeConverter
-    fun fromBitmap(bitmap: Bitmap): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        return outputStream.toByteArray()
+    fun fromUri(uri: Uri): String {
+        return uri.toString()
     }
-
     @TypeConverter
-    fun toBitmap(byteArray: ByteArray): Bitmap {
-        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    fun toUri(uriString: String): Uri {
+        return Uri.parse(uriString)
     }
 
     // List<String>(실사용) <-> String(DB) 변환
@@ -29,7 +24,6 @@ class Converter {
         val gson = Gson()
         return gson.toJson(list)
     }
-
     @TypeConverter
     fun toList(string: String): List<String>? {
         val gson = Gson()
@@ -42,7 +36,6 @@ class Converter {
     fun fromTimestamp(value: Long?): Date? {
         return value?.let { Date(it) }
     }
-
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time

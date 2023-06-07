@@ -2,7 +2,6 @@ package com.yjy.forestory.feature.post
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.result.ActivityResult
@@ -74,7 +73,6 @@ class AddPostViewModel @Inject constructor(
     private val _takePhotoUri = MutableLiveData<Uri?>()
 
     private fun createTakePhotoIntent(): Intent? {
-
         _takePhotoUri.value = try {
             imageUtils.createTempImageFile()
         } catch (ex: IOException) {
@@ -211,7 +209,6 @@ class AddPostViewModel @Inject constructor(
     }
 
 
-    // val allPosts: LiveData<List<PostDTO>> = postRepository.getAllPosts().asLiveData()
 
     private val _isCompleteInsert = MutableLiveData<Event<Boolean>>()
     val isCompleteInsert: LiveData<Event<Boolean>> get() = _isCompleteInsert
@@ -219,17 +216,21 @@ class AddPostViewModel @Inject constructor(
     fun addPost() {
         _isLoading.value = true
         viewModelScope.launch {
-            val inputImage: Bitmap? = imageUtils.uriToCompressedBitmap(_currentPhoto.value!!, 80)
 
-            if (inputImage != null) {
-                val post = PostDTO(inputImage!!, contentText.value!!, tagList.value, Date())
+            // Crop된 이미지를 내부 저장소에 복사 후 Uri를 추출해 해당 이미지 경로를 DB에 저장. Crop된 이미지는 어플 내부 cache에 저장되는 임시 파일임.
+            // Bitmap -> ByteArray로 저장하는 방식은 용량이 조금만 커도 OOM 발생하므로 폐지.
+            val uploadImage: Uri? = imageUtils.copyImageToInternalStorage(_currentPhoto.value!!)
+
+            if (uploadImage != null) {
+                val post = PostDTO(uploadImage!!, contentText.value!!, tagList.value, Date())
                 postRepository.insert(post)
 
-                _isLoading.value = false
                 setToastMsg(R.style.successToast, "게시글이 추가됐습니다.")
+                _isLoading.value = false
                 _isCompleteInsert.value = Event(true)
             } else {
-                setToastMsg(R.style.errorToast, "이미지 비트맵 변환 실패")
+                setToastMsg(R.style.errorToast, "이미지 업로드 실패")
+                _isLoading.value = false
             }
         }
     }

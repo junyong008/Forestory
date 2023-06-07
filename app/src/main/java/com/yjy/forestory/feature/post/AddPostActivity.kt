@@ -4,17 +4,16 @@ import EventObserver
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.view.setPadding
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.bumptech.glide.Glide
 import com.github.logansdk.permission.PermissionManager
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -75,18 +74,14 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
 
         // BindingAdapter를 이용해 바인딩 하지 않은 이유 : 추후 재사용이 불가능한 바인딩 형태라 판단하여 BindingAdapter의 부담을 덜기 위함.
         addPostViewModel.currentPhoto.observe(this, Observer { inputUri ->
+            val ibuttonAddPhoto = binding.ibuttonAddPhoto
             if (inputUri != null) {
-                binding.ibuttonAddPhoto.apply {
-                    setPadding(0)
-                    scaleType = ImageView.ScaleType.CENTER_CROP
-                    setImageURI(inputUri)
-                }
+                Glide.with(this)
+                    .load(inputUri)
+                    .centerCrop()
+                    .into(ibuttonAddPhoto)
             } else {
-                binding.ibuttonAddPhoto.apply {
-                    setPadding(500)
-                    scaleType = ImageView.ScaleType.CENTER
-                    setImageDrawable(ContextCompat.getDrawable(baseContext, R.drawable.ic_addphoto))
-                }
+                ibuttonAddPhoto.setImageResource(R.drawable.ic_addphoto)
             }
         })
 
@@ -155,7 +150,15 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
     }
 
     override fun onCameraClick() {
-        val permissions = arrayOf(Manifest.permission.CAMERA)
+
+        // 안드로이드 10부터는 WRITE/READ 권한 요청 필요 없음
+        val permissions =
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            arrayOf(Manifest.permission.CAMERA)
+        } else {
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
         PermissionManager.with(this@AddPostActivity, permissions).check { granted, denied, rejected ->
             addPostViewModel.checkPermission(
                 permissions = permissions,
