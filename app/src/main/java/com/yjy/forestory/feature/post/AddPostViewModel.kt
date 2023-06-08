@@ -10,9 +10,11 @@ import com.theartofdev.edmodo.cropper.CropImage
 import com.yjy.forestory.R
 import com.yjy.forestory.model.db.dto.PostDTO
 import com.yjy.forestory.repository.PostRepository
+import com.yjy.forestory.repository.UserRepository
 import com.yjy.forestory.util.Event
 import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.*
@@ -22,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddPostViewModel @Inject constructor(
     private val imageUtils: ImageUtils,
+    private val userRepository: UserRepository,
     private val postRepository: PostRepository
 ) : ViewModel() {
 
@@ -74,7 +77,7 @@ class AddPostViewModel @Inject constructor(
 
     private fun createTakePhotoIntent(): Intent? {
         _takePhotoUri.value = try {
-            imageUtils.createTempImageFile()
+            imageUtils .createTempImageFile()
         } catch (ex: IOException) {
             null
         }
@@ -214,6 +217,7 @@ class AddPostViewModel @Inject constructor(
     val isCompleteInsert: LiveData<Event<Boolean>> get() = _isCompleteInsert
 
     fun addPost() {
+
         _isLoading.value = true
         viewModelScope.launch {
 
@@ -221,17 +225,22 @@ class AddPostViewModel @Inject constructor(
             // Bitmap -> ByteArray로 저장하는 방식은 용량이 조금만 커도 OOM 발생하므로 폐지.
             val uploadImage: Uri? = imageUtils.copyImageToInternalStorage(_currentPhoto.value!!)
 
-            if (uploadImage != null) {
-                val post = PostDTO(uploadImage!!, contentText.value!!, tagList.value, Date())
-                postRepository.insert(post)
+            // 사용자 이름과 프로필 사진을 가져오기.
+            val userName = userRepository.getUserName().firstOrNull()
+            var userProfile = userRepository.getUserPicture().firstOrNull()
 
-                setToastMsg(R.style.successToast, "게시글이 추가됐습니다.")
+            if (uploadImage == null || userName == null || userProfile == null) {
+                setToastMsg(R.style.errorToast, "게시글 업로드 실패")
                 _isLoading.value = false
-                _isCompleteInsert.value = Event(true)
-            } else {
-                setToastMsg(R.style.errorToast, "이미지 업로드 실패")
-                _isLoading.value = false
+                return@launch
             }
+
+            val post = PostDTO(userName, userProfile, uploadImage, contentText.value!!, tagList.value, Date())
+            postRepository.insert(post)
+
+            setToastMsg(R.style.successToast, "게시글이 추가됐습니다.")
+            _isLoading.value = false
+            _isCompleteInsert.value = Event(true)
         }
     }
 }

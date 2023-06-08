@@ -7,6 +7,8 @@ import java.util.*
 
 @Entity(tableName = "Post")
 data class PostDTO(
+    val userName: String,
+    val userPicture: Uri,
     val image: Uri,
     val content: String,
     val tagList: List<String>?,
