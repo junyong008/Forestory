@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResult
 import androidx.lifecycle.*
 import com.theartofdev.edmodo.cropper.CropImage
 import com.yjy.forestory.R
-import com.yjy.forestory.model.db.dto.PostDTO
 import com.yjy.forestory.repository.PostRepository
 import com.yjy.forestory.repository.UserRepository
 import com.yjy.forestory.util.Event
@@ -17,7 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.util.*
 import javax.inject.Inject
 
 
@@ -229,18 +227,14 @@ class AddPostViewModel @Inject constructor(
             val userName = userRepository.getUserName().firstOrNull()
             var userProfile = userRepository.getUserPicture().firstOrNull()
 
-            if (uploadImage == null || userName == null || userProfile == null) {
+            if (postRepository.addPost(userName, userProfile, uploadImage, contentText.value, tagList.value)) {
+                setToastMsg(R.style.successToast, "게시글이 추가됐습니다.")
+                _isLoading.value = false
+                _isCompleteInsert.value = Event(true)
+            } else {
                 setToastMsg(R.style.errorToast, "게시글 업로드 실패")
                 _isLoading.value = false
-                return@launch
             }
-
-            val post = PostDTO(userName, userProfile, uploadImage, contentText.value!!, tagList.value, Date())
-            postRepository.insert(post)
-
-            setToastMsg(R.style.successToast, "게시글이 추가됐습니다.")
-            _isLoading.value = false
-            _isCompleteInsert.value = Event(true)
         }
     }
 }

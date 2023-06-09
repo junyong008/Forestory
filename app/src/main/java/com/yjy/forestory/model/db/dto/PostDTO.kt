@@ -15,5 +15,5 @@ data class PostDTO(
     val createDate: Date
 ) {
     @PrimaryKey(autoGenerate = true)
-    var id: Int? = null
+    var postId: Int? = null
 }

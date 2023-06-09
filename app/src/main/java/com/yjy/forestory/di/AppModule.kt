@@ -2,10 +2,7 @@ package com.yjy.forestory.di
 
 import android.content.Context
 import com.yjy.forestory.model.db.ForestoryDatabase
-import com.yjy.forestory.repository.PostRepository
-import com.yjy.forestory.repository.PostRepositoryImpl
-import com.yjy.forestory.repository.UserRepository
-import com.yjy.forestory.repository.UserRepositoryImpl
+import com.yjy.forestory.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,6 +25,12 @@ object AppModule {
     @Provides
     fun providePostRepository(forestoryDatabase: ForestoryDatabase): PostRepository {
         return PostRepositoryImpl(forestoryDatabase.postDao())
+    }
+
+    @Singleton
+    @Provides
+    fun provideCommentRepository(forestoryDatabase: ForestoryDatabase): CommentRepository {
+        return CommentRepositoryImpl(forestoryDatabase.commentDao())
     }
 
     @Singleton
