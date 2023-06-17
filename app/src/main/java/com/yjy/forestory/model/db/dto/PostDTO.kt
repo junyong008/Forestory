@@ -12,7 +12,8 @@ data class PostDTO(
     val image: Uri,
     val content: String,
     val tagList: List<String>?,
-    val createDate: Date
+    val createDate: Date,
+    val isAddingComments: Boolean = false
 ) {
     @PrimaryKey(autoGenerate = true)
     var postId: Int? = null

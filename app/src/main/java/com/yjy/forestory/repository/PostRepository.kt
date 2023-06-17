@@ -15,6 +15,12 @@ class PostRepositoryImpl(private val postDao: PostDAO): PostRepository {
         return postDao.getAllPosts()
     }
 
+    @WorkerThread
+    override suspend fun updateTempColumn(value: Int, postId: Int?) {
+        postDao.updateTempColumn(value, postId)
+    }
+
+
     // 유효성 검사를 Repository에서 처리함으로 데이터 입력의 안정성을 높이고 호출자로 하여금 데이터 유효성 검사를 하지 않게 해서 중복 코드를 줄이고 유지보수의 용이성을 높인다!
     @WorkerThread
     override suspend fun addPost(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean {
@@ -31,5 +37,6 @@ class PostRepositoryImpl(private val postDao: PostDAO): PostRepository {
 
 interface PostRepository {
     fun getAllPosts(): Flow<List<PostWithComments>>
+    suspend fun updateTempColumn(value: Int, postId: Int? = null)
     suspend fun addPost(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean
 }

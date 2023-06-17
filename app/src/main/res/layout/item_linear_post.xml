@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="postDto"
-            type="com.yjy.forestory.model.db.dto.PostDTO"/>
+            name="postWithComments"
+            type="com.yjy.forestory.model.db.dto.PostWithComments"/>
     </data>
 
     <LinearLayout
@@ -30,12 +30,12 @@
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/circleImageView_userPicture"
-                    imageUri="@{postDto.userPicture}"
+                    imageUri="@{postWithComments.post.userPicture}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginStart="12dp"
                     android:src="@mipmap/ic_launcher"
-                    app:civ_border_color="@color/gray"
+                    app:civ_border_color="@color/green"
                     app:civ_border_width="1dp"
                     app:layout_constraintBottom_toTopOf="@+id/imageView_post"
                     app:layout_constraintStart_toStartOf="parent"
@@ -57,7 +57,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="18dp"
                         android:fontFamily="@font/kjcgothic_bold"
-                        android:text="@{postDto.userName}"
+                        android:text="@{postWithComments.post.userName}"
                         android:textColor="@color/black"
                         android:textSize="15sp" />
 
@@ -66,7 +66,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="13dp"
                         android:fontFamily="@font/kjcgothic_bold"
-                        formattedDateTime="@{postDto.createDate}"
+                        formattedDateTime="@{postWithComments.post.createDate}"
                         android:textColor="@color/gray"
                         android:textSize="11sp" />
 
@@ -85,7 +85,7 @@
 
                 <ImageView
                     android:id="@+id/imageView_post"
-                    imageUri="@{postDto.image}"
+                    imageUri="@{postWithComments.post.image}"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_marginTop="54dp"
@@ -105,7 +105,7 @@
                     app:alignContent="space_around"
                     app:alignItems="stretch"
                     app:flexWrap="wrap"
-                    readOnlyChips="@{postDto.tagList}"
+                    readOnlyChips="@{postWithComments.post.tagList}"
                     android:background="@drawable/bg_lightgray_round_bottom"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -118,9 +118,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="@{postDto.content}"
-                    android:textSize="18sp"
+                    android:text="@{postWithComments.post.content}"
+                    android:textSize="15sp"
                     android:textColor="@color/black"
+                    android:fontFamily="@font/kjcgothic"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/chipgroup_tags" />
@@ -144,6 +145,31 @@
                     android:fontFamily="@font/kjcgothic_bold"
                     android:text="숲속 친구들에게 알리기"
                     android:textColor="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:elevation="2dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@+id/button_addComment"
+                    app:layout_constraintEnd_toEndOf="@+id/button_addComment"
+                    app:layout_constraintStart_toStartOf="@+id/button_addComment"
+                    app:layout_constraintTop_toTopOf="@+id/button_addComment" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView_comments"
+                    commentItems="@{postWithComments.comments}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

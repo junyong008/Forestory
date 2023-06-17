@@ -2,15 +2,22 @@ package com.yjy.forestory.util
 
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -67,6 +74,47 @@ class ImageUtils @Inject constructor(@ApplicationContext private val context: Co
             // 복사한 이미지의 Uri 반환
             return FileProvider.getUriForFile(context, context.packageName + ".fileprovider", outputFile)
         } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return null
+    }
+
+    // 서버 전송을 위한 Uri -> Multipart 변환 함수
+    fun uriToMultipart(uri: Uri): MultipartBody.Part? {
+        try {
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            val originalFile = File(context.cacheDir, "temp_file") // 캐시 디렉토리에 임시 파일 생성
+
+            val outputStream = FileOutputStream(originalFile)
+
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output) // InputStream에서 OutputStream으로 데이터 복사
+                }
+            }
+
+            // 이미지 압축
+            val compressedFile = File(context.cacheDir, "temp_compressed_file")
+            val bitmap = BitmapFactory.decodeFile(originalFile.path)
+
+            var quality = 100
+            val maxSizeBytes = 1 * 1024 * 1024 // 1MB를 최대 크기로 지정하고 압축
+
+            // 원하는 파일 크기가 될때까지 quality를 줄여가면서 압축
+            var streamLength = maxSizeBytes
+            while (streamLength >= maxSizeBytes) {
+                val fileOutputStream = FileOutputStream(compressedFile)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, fileOutputStream)
+                fileOutputStream.close()
+
+                streamLength = compressedFile.length().toInt()
+                quality -= 5
+            }
+
+            val requestFile: RequestBody = compressedFile.asRequestBody("image/*".toMediaTypeOrNull())
+            return MultipartBody.Part.createFormData("image", compressedFile.name, requestFile)
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 

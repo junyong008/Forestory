@@ -1,5 +1,6 @@
 package com.yjy.forestory.feature.post
 
+import EventObserver
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
-import com.yjy.forestory.model.db.dto.PostDTO
+import com.yjy.forestory.model.db.dto.PostWithComments
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.muddz.styleabletoast.StyleableToast
 
 @AndroidEntryPoint
 class LinearPostListFragment : Fragment() {
@@ -18,6 +20,8 @@ class LinearPostListFragment : Fragment() {
     // 바인딩, 뷰모델 정의
     private lateinit var binding: FragmentLinearPostListBinding
     private val linearPostListViewModel: LinearPostListViewModel by viewModels()
+
+    private var mToast: StyleableToast? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -31,12 +35,28 @@ class LinearPostListFragment : Fragment() {
         // DialogFragment는 onCreate에서 할당하는게 아니기에, 띄워져 있는 상태에서 CC 가 발생하면 리스너 등록이 안된다.
         binding.recyclerViewPosts.adapter = PostAdapter(postItemClickListener, true)
 
+
+        setEventObserver()
+
         return binding.root
     }
 
-    private val postItemClickListener = object : PostItemClickListener {
-        override fun onGetCommentClicked(post: PostDTO) {
+    private fun setEventObserver() {
 
+        // 토스트 메시지 띄우기
+        linearPostListViewModel.showToast.observe(this, EventObserver {
+            mToast?.let { it.cancel() }
+
+            val toastMessage = linearPostListViewModel.toastMessage.value
+            val toastIcon = linearPostListViewModel.toastIcon.value ?: 0
+            mToast = StyleableToast.makeText(requireContext(), toastMessage, toastIcon).also { it.show() }
+        })
+
+    }
+
+    private val postItemClickListener = object : PostItemClickListener {
+        override fun onGetCommentClicked(postWithComments: PostWithComments) {
+            linearPostListViewModel.getComments(postWithComments)
         }
     }
 }

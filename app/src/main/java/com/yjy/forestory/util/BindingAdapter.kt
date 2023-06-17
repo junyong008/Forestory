@@ -11,7 +11,9 @@ import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yjy.forestory.R
+import com.yjy.forestory.feature.post.CommentAdapter
 import com.yjy.forestory.feature.post.PostAdapter
+import com.yjy.forestory.model.db.dto.CommentDTO
 import com.yjy.forestory.model.db.dto.PostWithComments
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,16 +21,41 @@ import java.util.*
 // BindingAdapter 원칙 규정 : 재사용이 가능한 바인딩. 일회성 바인딩은 각자 뷰에서 LiveData Observe로 처리.
 object BindingAdapter {
 
-    // RecyclerView의 PostDTO 형식 List를 등록. Adapter는 각자 뷰(액티비티 or 프레그먼트)에서 사전 등록. (클릭 이벤트 리스너 등록 위해서.)
+    // RecyclerView의 PostWithComments 형식 List를 등록. Adapter는 각자 뷰(액티비티 or 프레그먼트)에서 사전 등록. (클릭 이벤트 리스너 등록 위해서.)
     @BindingAdapter("postItems")
     @JvmStatic
-    fun setItems(recyclerView: RecyclerView, postList : List<PostWithComments>?){
+    fun setPostItems(recyclerView: RecyclerView, postList: List<PostWithComments>?){
 
         postList?.let {
             val postAdapter = recyclerView.adapter as PostAdapter
+            val oldSize = postAdapter.itemCount
 
             // 자동 갱신 : 리스트의 주소가 변경된다는걸 가정하고 비교하며 갱신하므로, 테스트로 임의의 내부 리스트를 전달하면 갱신이 안됨. 고로 테스트용으로 .toMutableList() 작성.
-            postAdapter.submitList(it.toMutableList())
+            postAdapter.submitList(it) {
+
+                // 기존 리사이클러뷰 항목보다 늘어났다면 최상단으로 스크롤 이동
+                if (oldSize < postAdapter.itemCount) {
+                    recyclerView.scrollToPosition(0)
+                }
+            }
+        }
+    }
+
+    // RecyclerView의 CommentDTO 형식 List를 등록.
+    @BindingAdapter("commentItems")
+    @JvmStatic
+    fun setCommentItems(recyclerView: RecyclerView, commentList: List<CommentDTO>?){
+
+        commentList?.let {
+
+            // 연결돼 있는 어댑터가 없다면 연결. 클릭 이벤트 리스너 등록이 필요 없으므로 바인딩어댑터에서 등록하는 것임.
+            if (recyclerView.adapter == null) {
+                val commentAdapter = CommentAdapter()
+                recyclerView.adapter = commentAdapter
+            }
+
+            val commentAdapter = recyclerView.adapter as CommentAdapter
+            commentAdapter.submitList(it)
         }
     }
 

@@ -7,7 +7,6 @@ import com.yjy.forestory.model.db.dto.CommentDTO
 
 @Dao
 interface CommentDAO {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(comment: CommentDTO)
 }

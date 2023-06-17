@@ -10,5 +10,5 @@ data class PostWithComments(
         entityColumn = "postId",
         entity = CommentDTO::class
     )
-    val comments: List<CommentDTO>?
+    val comments: List<CommentDTO>
 )
