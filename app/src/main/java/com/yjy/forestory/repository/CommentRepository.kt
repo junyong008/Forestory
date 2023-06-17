@@ -70,8 +70,20 @@ class CommentRepositoryImpl(private val commentDao: CommentDAO): CommentReposito
             return e.code()
         }
     }
+
+    @WorkerThread
+    override suspend fun deleteComments(comments: List<CommentDTO>?): Boolean {
+
+        if (comments == null) {
+            return false
+        }
+
+        commentDao.deleteList(comments)
+        return true
+    }
 }
 
 interface CommentRepository {
     suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, postImage: MultipartBody.Part?): Int
+    suspend fun deleteComments(comments: List<CommentDTO>?): Boolean
 }

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.databinding.ItemGridPostBinding
 import com.yjy.forestory.databinding.ItemLinearPostBinding
 import com.yjy.forestory.model.db.dto.PostWithComments
@@ -25,6 +26,11 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
                 listener.onPostImageClicked(getItem(adapterPosition))
+            }
+
+            // 옵션 메뉴 클릭 리스너
+            binding.ibuttonMenu.setOnClickListener {
+                showMenuDialog(binding.ibuttonMenu, getItem(adapterPosition))
             }
         }
 
@@ -49,6 +55,38 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
 
             binding.postWithComments = postWithComments
+        }
+
+        // 옵션 메뉴를 띄우고 해당 아이템 클릭시 리스너에 알림
+        private fun showMenuDialog(view: View, postWithComments: PostWithComments) {
+            val menuItems = arrayOf("삭제하기") // 메뉴 항목 배열
+
+            MaterialAlertDialogBuilder(view.context)
+                .setItems(menuItems) { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            // "삭제하기" 메뉴 항목 클릭 처리
+                            showDeleteConfirmationDialog(view, postWithComments)
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        // 삭제 버튼은 한번 더 확인 다이얼로그를 띄움
+        private fun showDeleteConfirmationDialog(view: View, postWithComments: PostWithComments) {
+            // 통일된 사용자 경험을 위해 [확인 / 취소] 순서로 변경
+            MaterialAlertDialogBuilder(view.context)
+                .setMessage("게시글을 삭제하시겠습니까?")
+                .setNegativeButton("확인") { dialog, _ ->
+                    listener.onDeletePostClicked(postWithComments)
+                    dialog.dismiss()
+                }
+                .setPositiveButton("취소") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
         }
     }
 
@@ -112,4 +150,5 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 interface PostItemClickListener {
     fun onGetCommentClicked(postWithComments: PostWithComments)
     fun onPostImageClicked(postWithComments: PostWithComments)
+    fun onDeletePostClicked(postWithComments: PostWithComments)
 }

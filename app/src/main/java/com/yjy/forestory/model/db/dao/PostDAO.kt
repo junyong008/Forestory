@@ -12,6 +12,9 @@ interface PostDAO {
     fun getAllPosts(): Flow<List<PostWithComments>> // Flow 를 사용함으로써 테이블의 데이터가 변경되면 쿼리를 실행해 결과를 반환한다.
 
 
+    @Delete
+    suspend fun delete(post: PostDTO)
+
     @Query("UPDATE Post SET isAddingComments = :value WHERE postId = :postId OR :postId IS NULL")
     suspend fun updateTempColumn(value: Int, postId: Int? = null)
 

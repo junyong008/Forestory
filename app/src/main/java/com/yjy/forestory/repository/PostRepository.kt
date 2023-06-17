@@ -33,10 +33,22 @@ class PostRepositoryImpl(private val postDao: PostDAO): PostRepository {
         postDao.insert(post)
         return true
     }
+
+    @WorkerThread
+    override suspend fun deletePost(post: PostDTO?): Boolean {
+
+        if (post == null) {
+            return false
+        }
+
+        postDao.delete(post)
+        return true
+    }
 }
 
 interface PostRepository {
     fun getAllPosts(): Flow<List<PostWithComments>>
     suspend fun updateTempColumn(value: Int, postId: Int? = null)
     suspend fun addPost(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean
+    suspend fun deletePost(post: PostDTO?): Boolean
 }

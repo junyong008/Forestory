@@ -67,5 +67,10 @@ class LinearPostListFragment : Fragment() {
             intent.putExtra("imageUri", postWithComments.post.image.toString())
             startActivity(intent)
         }
+
+        // 게시글 삭제 클릭 리스너 재정의
+        override fun onDeletePostClicked(postWithComments: PostWithComments) {
+            linearPostListViewModel.deletePost(postWithComments)
+        }
     }
 }
