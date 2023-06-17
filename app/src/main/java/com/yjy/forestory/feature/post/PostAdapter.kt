@@ -17,8 +17,14 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
     inner class LinearViewHolder(private val binding: ItemLinearPostBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
+            // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
                 listener.onGetCommentClicked(getItem(adapterPosition))
+            }
+
+            // 이미지 클릭 리스너
+            binding.imageViewPost.setOnClickListener {
+                listener.onPostImageClicked(getItem(adapterPosition))
             }
         }
 
@@ -105,4 +111,5 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
 interface PostItemClickListener {
     fun onGetCommentClicked(postWithComments: PostWithComments)
+    fun onPostImageClicked(postWithComments: PostWithComments)
 }

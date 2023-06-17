@@ -2,7 +2,6 @@ package com.yjy.forestory.feature.post
 
 import EventObserver
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -40,7 +39,6 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
     // 시스템의 뒤로가기 버튼 눌렀을 때
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            setResult(Activity.RESULT_CANCELED)
             finish()
             overridePendingTransition(R.anim.stay, R.anim.slide_out_down)
         }

@@ -1,6 +1,7 @@
 package com.yjy.forestory.feature.post
 
 import EventObserver
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -55,8 +56,16 @@ class LinearPostListFragment : Fragment() {
     }
 
     private val postItemClickListener = object : PostItemClickListener {
+        // 댓글 추가 버튼 클릭 리스너 재정의
         override fun onGetCommentClicked(postWithComments: PostWithComments) {
             linearPostListViewModel.getComments(postWithComments)
+        }
+
+        // 이미지 클릭 리스너 재정의
+        override fun onPostImageClicked(postWithComments: PostWithComments) {
+            val intent = Intent(activity, ImageZoomActivity::class.java)
+            intent.putExtra("imageUri", postWithComments.post.image.toString())
+            startActivity(intent)
         }
     }
 }
