@@ -82,6 +82,7 @@
             android:layout_weight="1"
             android:overScrollMode="never"
             android:background="@drawable/bg_lightgray_round"
+            android:clipToOutline="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

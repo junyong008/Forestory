@@ -2,10 +2,15 @@ package com.yjy.forestory.util
 
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.databinding.BindingAdapter
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
@@ -15,6 +20,7 @@ import com.yjy.forestory.feature.post.CommentAdapter
 import com.yjy.forestory.feature.post.PostAdapter
 import com.yjy.forestory.model.db.dto.CommentDTO
 import com.yjy.forestory.model.db.dto.PostWithComments
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,19 +30,13 @@ object BindingAdapter {
     // RecyclerView의 PostWithComments 형식 List를 등록. Adapter는 각자 뷰(액티비티 or 프레그먼트)에서 사전 등록. (클릭 이벤트 리스너 등록 위해서.)
     @BindingAdapter("postItems")
     @JvmStatic
-    fun setPostItems(recyclerView: RecyclerView, postList: List<PostWithComments>?){
+    fun setPostItems(recyclerView: RecyclerView, pagingData: PagingData<PostWithComments>?) {
+        pagingData?.let {
+            val postAdapter = recyclerView.adapter as PostAdapter // 이 부분은 PostAdapter를 PagingDataAdapter로 변경해야 합니다.
 
-        postList?.let {
-            val postAdapter = recyclerView.adapter as PostAdapter
-            val oldSize = postAdapter.itemCount
-
-            // 자동 갱신 : 리스트의 주소가 변경된다는걸 가정하고 비교하며 갱신하므로, 테스트로 임의의 내부 리스트를 전달하면 갱신이 안됨. 고로 테스트용으로 .toMutableList() 작성.
-            postAdapter.submitList(it) {
-
-                // 기존 리사이클러뷰 항목보다 늘어났다면 최상단으로 스크롤 이동
-                if (oldSize < postAdapter.itemCount) {
-                    recyclerView.scrollToPosition(0)
-                }
+            // lifecycleScope를 통해 submitData()를 호출
+            recyclerView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                postAdapter.submitData(it)
             }
         }
     }
@@ -56,6 +56,31 @@ object BindingAdapter {
 
             val commentAdapter = recyclerView.adapter as CommentAdapter
             commentAdapter.submitList(it)
+        }
+    }
+
+    // LinearPostList와 PostActivity에서 겹쳐서 바인딩 어댑터로 묶음. 댓글 추가버튼의 상태를 게시글과 댓글 상태에 따라서 변경
+    @BindingAdapter("commentAddButtonState")
+    @JvmStatic
+    fun setCommentAddButtonState(button: AppCompatButton, postWithComments: PostWithComments){
+
+        val commentAddButtonText = "숲속 친구들에게 알리기"
+        postWithComments?.let {
+            // 댓글이 있다면 댓글 추가 버튼 숨기기
+            if (postWithComments.comments.isNotEmpty()) {
+                button.visibility = View.GONE
+            } else {
+                button.visibility = View.VISIBLE
+            }
+
+            // 댓글이 없고 만약 추가중이라면 버튼 비활성화
+            if (postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments) {
+                button.setText("")
+                button.isEnabled = false
+            } else {
+                button.setText(commentAddButtonText)
+                button.isEnabled = true
+            }
         }
     }
 
@@ -105,7 +130,7 @@ object BindingAdapter {
     // chipGroup의 chip을 바인딩 : 읽기 전용 Chip 바인딩
     @BindingAdapter("readOnlyChips")
     @JvmStatic
-    fun setReadOnlyChips(chipGroup: ChipGroup, chipTexts: MutableList<String>?) {
+    fun setReadOnlyChips(chipGroup: ChipGroup, chipTexts: List<String>?) {
 
         chipGroup.removeAllViews()
 

@@ -1,42 +1,65 @@
 package com.yjy.forestory.feature.post
 
+import EventObserver
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
+import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentGridPostListBinding
+import com.yjy.forestory.model.db.dto.PostWithComments
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class GridPostListFragment : Fragment() {
 
-    private var _binding: FragmentGridPostListBinding? = null
+    private lateinit var binding: FragmentGridPostListBinding
+    @Inject lateinit var postViewModel: PostViewModel
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_grid_post_list, container, false)
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(GridPostListViewModel::class.java)
+        binding.lifecycleOwner = this@GridPostListFragment
+        binding.postViewModel = postViewModel
 
-        _binding = FragmentGridPostListBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        binding.recyclerViewPosts.adapter = PostAdapter(postItemClickListener, false)
 
-        val textView: TextView = binding.textSetting
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        // 리사이클러뷰 Adapter의 로딩 상태를 감지하여 프로그레스 보여주기
+        val recyclerViewAdapter = binding.recyclerViewPosts.adapter as PostAdapter
+        recyclerViewAdapter.addLoadStateListener { loadState ->
+            binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
-        return root
+
+        postViewModel.isPostAdded.observe(viewLifecycleOwner, EventObserver {
+            lifecycleScope.launch {
+                delay(100) // DB의 변경이 리사이클러뷰에 반영되는 시간을 고려하여 약간의 딜레이를 부여
+                binding.recyclerViewPosts.smoothScrollToPosition(0)
+            }
+        })
+
+        return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private val postItemClickListener = object : PostItemClickListener {
+        // 이미지 클릭 리스너 재정의
+        override fun onPostImageClicked(postWithComments: PostWithComments) {
+            val intent = Intent(activity, PostActivity::class.java)
+            intent.putExtra("postId", postWithComments.post.postId)
+            startActivity(intent)
+            activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
+        }
+
+        override fun onGetCommentClicked(postWithComments: PostWithComments) {}
+        override fun onDeletePostClicked(postWithComments: PostWithComments) {}
     }
 }

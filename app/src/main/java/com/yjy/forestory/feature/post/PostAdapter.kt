@@ -3,15 +3,16 @@ package com.yjy.forestory.feature.post
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.databinding.ItemGridPostBinding
 import com.yjy.forestory.databinding.ItemLinearPostBinding
 import com.yjy.forestory.model.db.dto.PostWithComments
 
-class PostAdapter(private val listener: PostItemClickListener, private val isLinearView: Boolean) : ListAdapter<PostWithComments, RecyclerView.ViewHolder>(diffUtil) {
+class PostAdapter(private val listener: PostItemClickListener, private val isLinearView: Boolean) : PagingDataAdapter<PostWithComments, RecyclerView.ViewHolder>(diffUtil) {
 
     private val VIEW_TYPE_LINEAR = 0
     private val VIEW_TYPE_GRID = 1
@@ -20,40 +21,24 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
         init {
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
-                listener.onGetCommentClicked(getItem(adapterPosition))
+                listener.onGetCommentClicked(getItem(adapterPosition)!!)
             }
 
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
-                listener.onPostImageClicked(getItem(adapterPosition))
+                listener.onPostImageClicked(getItem(adapterPosition)!!)
             }
 
             // 옵션 메뉴 클릭 리스너
             binding.ibuttonMenu.setOnClickListener {
-                showMenuDialog(binding.ibuttonMenu, getItem(adapterPosition))
+                showMenuDialog(binding.ibuttonMenu, getItem(adapterPosition)!!)
             }
         }
 
         fun bind(postWithComments: PostWithComments) {
 
-            // 댓글이 있다면 댓글 추가 버튼 숨기기
-            if (postWithComments.comments.isNotEmpty()) {
-                binding.buttonAddComment.visibility = View.GONE
-            } else {
-                binding.buttonAddComment.visibility = View.VISIBLE
-            }
-
-            // 댓글이 없고 만약 추가중이라면 버튼 비활성화 및 프로그레스 활성화
-            if (postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments) {
-                binding.buttonAddComment.setText("")
-                binding.buttonAddComment.isEnabled = false
-                binding.progressBar.visibility = View.VISIBLE
-            } else {
-                binding.buttonAddComment.setText("숲속 친구들에게 알리기")
-                binding.buttonAddComment.isEnabled = true
-                binding.progressBar.visibility = View.GONE
-            }
-
+            // 댓글이 없고 만약 추가중이라면 프로그레스 띄우기
+            binding.progressBar.isVisible = postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments
             binding.postWithComments = postWithComments
         }
 
@@ -92,8 +77,9 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
     inner class GridViewHolder(private val binding: ItemGridPostBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
-            binding.root.setOnClickListener {
-                // listener.onClicked(getItem(adapterPosition))
+            // 이미지 클릭 리스너
+            binding.imageViewPost.setOnClickListener {
+                listener.onPostImageClicked(getItem(adapterPosition)!!)
             }
         }
 
@@ -121,10 +107,10 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
         when (holder) {
             is LinearViewHolder -> {
-                holder.bind(postWithComments)
+                holder.bind(postWithComments!!)
             }
             is GridViewHolder -> {
-                holder.bind(postWithComments)
+                holder.bind(postWithComments!!)
             }
         }
     }
