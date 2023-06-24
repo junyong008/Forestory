@@ -1,12 +1,12 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import androidx.lifecycle.*
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yjy.forestory.Const.Companion.GENDER_MALE
 import com.yjy.forestory.R
-import com.yjy.forestory.model.db.dto.PostWithComments
-import com.yjy.forestory.repository.CommentRepository
-import com.yjy.forestory.repository.PostRepository
+import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.repository.UserRepository
 import com.yjy.forestory.util.Event
 import com.yjy.forestory.util.ImageUtils
@@ -17,10 +17,9 @@ import javax.inject.Singleton
 
 @Singleton // 싱글톤으로 구성하여 게시글의 조회, 수정, 삭제 등을 모두 총괄함.
 class PostViewModel @Inject constructor(
-    private val postRepository: PostRepository,
+    private val imageUtils: ImageUtils,
     private val userRepository: UserRepository,
-    private val commentRepository: CommentRepository,
-    private val imageUtils: ImageUtils
+    private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository
 ) : ViewModel() {
 
     // ---------------------------------- 토스트 메시지 설정
@@ -39,14 +38,16 @@ class PostViewModel @Inject constructor(
         _showToast.value = Event(true)
     }
 
-    // ---------------------------------- 모든 게시글 및 댓글 조회
-    val allPosts = postRepository.getPosts().cachedIn(viewModelScope).asLiveData()
+    // ---------------------------------- 모든 게시글, 태그, 댓글 조회
+    val postWithTagsAndCommentsList: LiveData<PagingData<PostWithTagsAndComments>> =
+        postWithTagsAndCommentsRepository.getPostWithTagsAndCommentsList().cachedIn(viewModelScope).asLiveData()
 
     // ---------------------------------- 특정 게시글 및 댓글 조회
-    fun getPost(postId: Int): LiveData<PostWithComments> = postRepository.getPost(postId).asLiveData()
+    fun getPostWithTagsAndComments(postId: Int): LiveData<PostWithTagsAndComments?> =
+        postWithTagsAndCommentsRepository.getPostWithTagsAndComments(postId).asLiveData()
 
     // ---------------------------------- 게시글 갯수 조회 및 추가 감지
-    private val postCount = postRepository.getPostCount().asLiveData()
+    val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
     private var previousPostCount = -1
 
     private val _isPostAdded = MediatorLiveData<Event<Boolean>>()
@@ -61,7 +62,7 @@ class PostViewModel @Inject constructor(
                  2. 비활성화는 클릭시 처리하고 리스너를 등록하면 되지만, recyclerView Adapter는 액티비티 혹은 프레그먼트에 의해 중속되므로 액티비티 혹은 프레그먼트가 Configuration Change가 일어나면 초기화가 되버린다
                  3. 고로, DB에 임시값을 추가하여 댓글을 추가하는 로직의 주체인 ViewModel에서 임시값을 다룬다.
                  4. 만약 이렇게 매번 임시값으로 초기화를 해주지 않으면, 댓글 추가 도중 어플이 종료되거나 뷰모델의 생명주기가 끝나면 댓글이 추가되지 않았음에도 계속 비활성화 될것이다. 고로 매번 초기화를 해준다.*/
-            postRepository.updateTempColumn(0)
+            postWithTagsAndCommentsRepository.updatePostIsAddingComments(0)
 
             // postCount 전체 개시글의 숫자에 변동이 생기면 이전 게시글의 갯수와 비교하여 게시글이 추가됐는지 감지
             _isPostAdded.addSource(postCount) { newCount ->
@@ -86,12 +87,12 @@ class PostViewModel @Inject constructor(
 
 
     // ---------------------------------- 게시글의 정보를 받아서 서버로부터 AI의 반응을 받아와 댓글을 추가
-    fun getComments(postWithComments: PostWithComments) {
+    fun getComments(postWithTagsAndComments: PostWithTagsAndComments) {
         viewModelScope.launch {
-            val post = postWithComments.post
+            val post = postWithTagsAndComments.post
 
             // 해당 게시글의 댓글을 현재 추가중임을 DB에 저장하여 명시
-            postRepository.updateTempColumn(1, post.postId!!)
+            postWithTagsAndCommentsRepository.updatePostIsAddingComments(1, post.postId)
 
             // 댓글을 불러오는데 필요한 요소들 정의
             val parentPostId = post.postId
@@ -101,27 +102,27 @@ class PostViewModel @Inject constructor(
             val postImage = imageUtils.uriToMultipart(post.image)
 
             // 결과를 받아와서 성공 실패 유무 보여주기
-            val responseCode = commentRepository.addComments(parentPostId, writerName, writerGender, postContent, postImage)
+            val responseCode = postWithTagsAndCommentsRepository.addComments(parentPostId, writerName, writerGender, postContent, postImage)
             if (responseCode != 200) {
                 setToastMsg(R.style.errorToast, "ERROR : $responseCode")
             }
 
             // 처리가 완료됐음을 DB에 명시
-            postRepository.updateTempColumn(0, post.postId!!)
+            postWithTagsAndCommentsRepository.updatePostIsAddingComments(0, post.postId)
         }
     }
 
     // ---------------------------------- 게시글 삭제
-    fun deletePost(postWithComments: PostWithComments) {
+    fun deletePostWithTagsAndComments(postWithTagsAndComments: PostWithTagsAndComments) {
 
         // 만약 댓글을 서버로부터 추가중이라면 삭제 막기
-        if (postWithComments.post.isAddingComments) {
+        if (postWithTagsAndComments.post.isAddingComments) {
             setToastMsg(R.style.errorToast, "숲속 친구들에게 알리고있는 게시글 입니다")
             return
         }
 
         viewModelScope.launch {
-            if (commentRepository.deleteComments(postWithComments.comments) && postRepository.deletePost(postWithComments.post)) {
+            if (postWithTagsAndCommentsRepository.deletePostWithTagsAndComments(postWithTagsAndComments)) {
                 setToastMsg(R.style.successToast, "삭제되었습니다")
             }
         }

@@ -3,8 +3,8 @@ package com.yjy.forestory.feature.main
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.yjy.forestory.feature.post.GridPostListFragment
-import com.yjy.forestory.feature.post.LinearPostListFragment
+import com.yjy.forestory.feature.viewPost.GridPostListFragment
+import com.yjy.forestory.feature.viewPost.LinearPostListFragment
 
 class MainViewPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(activity) {
 

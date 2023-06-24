@@ -1,6 +1,6 @@
 package com.yjy.forestory.model.network.api
 
-import com.yjy.forestory.model.network.response.CommentResponse
+import com.yjy.forestory.model.network.dto.CommentDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.*
@@ -14,5 +14,5 @@ interface CommentApi {
         @Part("writerGender") writerGender: RequestBody,
         @Part("postContent") postContent: RequestBody,
         @Part image: MultipartBody.Part
-    ) : List<CommentResponse>
+    ) : List<CommentDto>
 }

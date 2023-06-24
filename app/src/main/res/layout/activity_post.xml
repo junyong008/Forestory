@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="postViewModel"
-            type="com.yjy.forestory.feature.post.PostViewModel" />
+            type="com.yjy.forestory.feature.viewPost.PostViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -23,14 +23,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providePostRepository(forestoryDatabase: ForestoryDatabase): PostRepository {
-        return PostRepositoryImpl(forestoryDatabase.postDao())
-    }
-
-    @Singleton
-    @Provides
-    fun provideCommentRepository(forestoryDatabase: ForestoryDatabase): CommentRepository {
-        return CommentRepositoryImpl(forestoryDatabase.commentDao())
+    fun providePostWithTagsAndCommentsRepository(forestoryDatabase: ForestoryDatabase): PostWithTagsAndCommentsRepository {
+        return PostWithTagsAndCommentsRepositoryImpl(forestoryDatabase.postWithTagsAndCommentsDao())
     }
 
     @Singleton

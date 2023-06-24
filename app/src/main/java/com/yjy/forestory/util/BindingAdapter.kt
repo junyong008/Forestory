@@ -16,10 +16,11 @@ import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yjy.forestory.R
-import com.yjy.forestory.feature.post.CommentAdapter
-import com.yjy.forestory.feature.post.PostAdapter
-import com.yjy.forestory.model.db.dto.CommentDTO
-import com.yjy.forestory.model.db.dto.PostWithComments
+import com.yjy.forestory.feature.viewPost.CommentAdapter
+import com.yjy.forestory.feature.viewPost.PostAdapter
+import com.yjy.forestory.model.Comment
+import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.model.Tag
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,10 +28,10 @@ import java.util.*
 // BindingAdapter 원칙 규정 : 재사용이 가능한 바인딩. 일회성 바인딩은 각자 뷰에서 LiveData Observe로 처리.
 object BindingAdapter {
 
-    // RecyclerView의 PostWithComments 형식 List를 등록. Adapter는 각자 뷰(액티비티 or 프레그먼트)에서 사전 등록. (클릭 이벤트 리스너 등록 위해서.)
+    // RecyclerView의 PostWithTagsAndComments 형식 List를 등록. Adapter는 각자 뷰(액티비티 or 프레그먼트)에서 사전 등록. (클릭 이벤트 리스너 등록 위해서.)
     @BindingAdapter("postItems")
     @JvmStatic
-    fun setPostItems(recyclerView: RecyclerView, pagingData: PagingData<PostWithComments>?) {
+    fun setPostItems(recyclerView: RecyclerView, pagingData: PagingData<PostWithTagsAndComments>?) {
         pagingData?.let {
             val postAdapter = recyclerView.adapter as PostAdapter // 이 부분은 PostAdapter를 PagingDataAdapter로 변경해야 합니다.
 
@@ -41,10 +42,10 @@ object BindingAdapter {
         }
     }
 
-    // RecyclerView의 CommentDTO 형식 List를 등록.
+    // RecyclerView의 Comment 형식 List를 등록.
     @BindingAdapter("commentItems")
     @JvmStatic
-    fun setCommentItems(recyclerView: RecyclerView, commentList: List<CommentDTO>?){
+    fun setCommentItems(recyclerView: RecyclerView, commentList: List<Comment>?){
 
         commentList?.let {
 
@@ -62,19 +63,19 @@ object BindingAdapter {
     // LinearPostList와 PostActivity에서 겹쳐서 바인딩 어댑터로 묶음. 댓글 추가버튼의 상태를 게시글과 댓글 상태에 따라서 변경
     @BindingAdapter("commentAddButtonState")
     @JvmStatic
-    fun setCommentAddButtonState(button: AppCompatButton, postWithComments: PostWithComments){
+    fun setCommentAddButtonState(button: AppCompatButton, postWithTagsAndComments: PostWithTagsAndComments){
 
         val commentAddButtonText = "숲속 친구들에게 알리기"
-        postWithComments?.let {
+        postWithTagsAndComments?.let {
             // 댓글이 있다면 댓글 추가 버튼 숨기기
-            if (postWithComments.comments.isNotEmpty()) {
+            if (postWithTagsAndComments.comments.isNotEmpty()) {
                 button.visibility = View.GONE
             } else {
                 button.visibility = View.VISIBLE
             }
 
             // 댓글이 없고 만약 추가중이라면 버튼 비활성화
-            if (postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments) {
+            if (postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments) {
                 button.setText("")
                 button.isEnabled = false
             } else {
@@ -130,7 +131,7 @@ object BindingAdapter {
     // chipGroup의 chip을 바인딩 : 읽기 전용 Chip 바인딩
     @BindingAdapter("readOnlyChips")
     @JvmStatic
-    fun setReadOnlyChips(chipGroup: ChipGroup, chipTexts: List<String>?) {
+    fun setReadOnlyChips(chipGroup: ChipGroup, chipTexts: List<Tag>?) {
 
         chipGroup.removeAllViews()
 
@@ -138,7 +139,7 @@ object BindingAdapter {
             for (chipText in chipTexts) {
                 val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
                 newChip.id = ViewCompat.generateViewId()
-                newChip.text = chipText
+                newChip.text = chipText.content
 
                 chipGroup.addView(newChip)
             }

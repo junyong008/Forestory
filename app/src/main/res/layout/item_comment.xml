@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="commentDto"
-            type="com.yjy.forestory.model.db.dto.CommentDTO"/>
+            name="comment"
+            type="com.yjy.forestory.model.Comment"/>
     </data>
 
     <LinearLayout
@@ -31,7 +31,7 @@
                     android:layout_height="26dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    imageUri="@{commentDto.writerPicture}"
+                    imageUri="@{comment.writerPicture}"
                     android:src="@mipmap/ic_launcher"
                     app:civ_border_color="@color/gray"
                     app:civ_border_width="1dp"
@@ -45,7 +45,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_marginStart="8dp"
                     android:fontFamily="@font/kjcgothic_bold"
-                    android:text="@{commentDto.writerName}"
+                    android:text="@{comment.writerName}"
                     android:textColor="@color/black"
                     android:textSize="15sp"
                     app:layout_constraintStart_toEndOf="@+id/circleImageView_writerPicture"
@@ -62,7 +62,7 @@
                     android:fontFamily="@font/kjcgothic_bold"
                     android:inputType="textMultiLine"
                     android:minHeight="18dp"
-                    android:text="@{commentDto.content}"
+                    android:text="@{comment.content}"
                     android:textColor="@color/darkgray"
                     android:textSize="14sp"
                     app:layout_constraintBottom_toBottomOf="parent"

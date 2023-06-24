@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="addPostViewModel"
-            type="com.yjy.forestory.feature.post.AddPostViewModel" />
+            type="com.yjy.forestory.feature.addPost.AddPostViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/white"
-                tools:context=".feature.post.AddPostActivity">
+                tools:context=".feature.addPost.AddPostActivity">
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/ibutton_addPhoto"

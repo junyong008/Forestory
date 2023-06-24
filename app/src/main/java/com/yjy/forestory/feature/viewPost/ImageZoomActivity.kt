@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import android.net.Uri
 import android.os.Bundle

@@ -27,24 +27,22 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
-
-        <!-- ImageZoomActivity는 ActionBar가 필요하므로 별도의 Theme 정의 -->
+        </provider> <!-- ImageZoomActivity는 ActionBar가 필요하므로 별도의 Theme 정의 -->
         <activity
-            android:name=".feature.post.ImageZoomActivity"
+            android:name=".feature.viewPost.ImageZoomActivity"
             android:exported="false"
-            android:theme="@style/Theme.Forestory" />
-
-        <!-- Crop Activity는 ActionBar가 필요하므로 별도의 Theme 정의 -->
+            android:theme="@style/Theme.Forestory" /> <!-- Crop Activity는 ActionBar가 필요하므로 별도의 Theme 정의 -->
+        <activity
+            android:name=".feature.searchPost.SearchActivity"
+            android:exported="false" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Theme.Forestory" />
-
         <activity
-            android:name=".feature.post.PostActivity"
+            android:name=".feature.viewPost.PostActivity"
             android:exported="false" />
         <activity
-            android:name=".feature.post.AddPostActivity"
+            android:name=".feature.addPost.AddPostActivity"
             android:exported="false" />
         <activity
             android:name=".feature.main.MainActivity"

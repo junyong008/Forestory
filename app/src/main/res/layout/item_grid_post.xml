@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="postDto"
-            type="com.yjy.forestory.model.db.dto.PostDTO"/>
+            name="post"
+            type="com.yjy.forestory.model.Post"/>
     </data>
 
 
@@ -23,7 +23,7 @@
 
             <ImageView
                 android:id="@+id/imageView_post"
-                imageUri="@{postDto.image}"
+                imageUri="@{post.image}"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:background="@color/lightgray"

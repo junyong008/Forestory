@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import EventObserver
 import android.content.Intent
@@ -11,7 +11,7 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ActivityPostBinding
-import com.yjy.forestory.model.db.dto.PostWithComments
+import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.util.BindingAdapter.setCommentAddButtonState
 import com.yjy.forestory.util.BindingAdapter.setCommentItems
 import com.yjy.forestory.util.BindingAdapter.setFormattedDateTime
@@ -69,40 +69,40 @@ class PostActivity : AppCompatActivity() {
     private fun setObserver() {
 
         // 특정 게시글 정보를 받아와서 뷰를 업데이트 한다
-        postViewModel.getPost(postId).observe(this) { postWithComments ->
+        postViewModel.getPostWithTagsAndComments(postId).observe(this) { postWithTagsAndComments ->
 
             // 게시글 정보를 불러오지 못했으면 뒤로가기
-            if (postWithComments == null) {
+            if (postWithTagsAndComments == null) {
                 onBackPressedCallback.handleOnBackPressed()
                 return@observe
             }
 
             // 바인딩
-            setImageUri(binding.circleImageViewUserPicture, postWithComments.post.userPicture)
-            binding.textViewUserName.text = postWithComments.post.userName
-            setFormattedDateTime(binding.textViewCreateDate, postWithComments.post.createDate)
-            setImageUri(binding.imageViewPost, postWithComments.post.image)
-            setReadOnlyChips(binding.chipgroupTags, postWithComments.post.tagList)
-            binding.textViewContent.text = postWithComments.post.content
-            setCommentItems(binding.recyclerViewComments, postWithComments.comments)
-            setCommentAddButtonState(binding.buttonAddComment, postWithComments)
-            binding.progressBar.isVisible = postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments
+            setImageUri(binding.circleImageViewUserPicture, postWithTagsAndComments.post.userPicture)
+            binding.textViewUserName.text = postWithTagsAndComments.post.userName
+            setFormattedDateTime(binding.textViewCreateDate, postWithTagsAndComments.post.createDate)
+            setImageUri(binding.imageViewPost, postWithTagsAndComments.post.image)
+            setReadOnlyChips(binding.chipgroupTags, postWithTagsAndComments.tags)
+            binding.textViewContent.text = postWithTagsAndComments.post.content
+            setCommentItems(binding.recyclerViewComments, postWithTagsAndComments.comments)
+            setCommentAddButtonState(binding.buttonAddComment, postWithTagsAndComments)
+            binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
 
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
                 val intent = Intent(this, ImageZoomActivity::class.java)
-                intent.putExtra("imageUri", postWithComments.post.image.toString())
+                intent.putExtra("imageUri", postWithTagsAndComments.post.image.toString())
                 startActivity(intent)
             }
 
             // 게시글 메뉴 버튼 클릭 리스너
             binding.ibuttonMenu.setOnClickListener {
-                showMenuDialog(it, postWithComments)
+                showMenuDialog(it, postWithTagsAndComments)
             }
 
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
-                postViewModel.getComments(postWithComments)
+                postViewModel.getComments(postWithTagsAndComments)
             }
         }
 
@@ -121,7 +121,7 @@ class PostActivity : AppCompatActivity() {
 
     }
 
-    private fun showMenuDialog(view: View, postWithComments: PostWithComments) {
+    private fun showMenuDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
         val menuItems = arrayOf("삭제하기") // 메뉴 항목 배열
 
         MaterialAlertDialogBuilder(view.context)
@@ -129,7 +129,7 @@ class PostActivity : AppCompatActivity() {
                 when (which) {
                     0 -> {
                         // "삭제하기" 메뉴 항목 클릭 처리
-                        showDeleteConfirmationDialog(view, postWithComments)
+                        showDeleteConfirmationDialog(view, postWithTagsAndComments)
                     }
                 }
                 dialog.dismiss()
@@ -137,12 +137,12 @@ class PostActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showDeleteConfirmationDialog(view: View, postWithComments: PostWithComments) {
+    private fun showDeleteConfirmationDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
         // 통일된 사용자 경험을 위해 [확인 / 취소] 순서로 변경
         MaterialAlertDialogBuilder(view.context)
             .setMessage("게시글을 삭제하시겠습니까?")
             .setNegativeButton("확인") { dialog, _ ->
-                postViewModel.deletePost(postWithComments)
+                postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
                 dialog.dismiss()
             }
             .setPositiveButton("취소") { dialog, _ ->

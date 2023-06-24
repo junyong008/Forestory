@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.databinding.ItemGridPostBinding
 import com.yjy.forestory.databinding.ItemLinearPostBinding
-import com.yjy.forestory.model.db.dto.PostWithComments
+import com.yjy.forestory.model.PostWithTagsAndComments
 
-class PostAdapter(private val listener: PostItemClickListener, private val isLinearView: Boolean) : PagingDataAdapter<PostWithComments, RecyclerView.ViewHolder>(diffUtil) {
+class PostAdapter(private val listener: PostItemClickListener, private val isLinearView: Boolean) : PagingDataAdapter<PostWithTagsAndComments, RecyclerView.ViewHolder>(diffUtil) {
 
     private val VIEW_TYPE_LINEAR = 0
     private val VIEW_TYPE_GRID = 1
@@ -35,15 +35,15 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
         }
 
-        fun bind(postWithComments: PostWithComments) {
+        fun bind(postWithTagsAndComments: PostWithTagsAndComments) {
 
             // 댓글이 없고 만약 추가중이라면 프로그레스 띄우기
-            binding.progressBar.isVisible = postWithComments.comments.isEmpty() && postWithComments.post.isAddingComments
-            binding.postWithComments = postWithComments
+            binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
+            binding.postWithTagsAndComments = postWithTagsAndComments
         }
 
         // 옵션 메뉴를 띄우고 해당 아이템 클릭시 리스너에 알림
-        private fun showMenuDialog(view: View, postWithComments: PostWithComments) {
+        private fun showMenuDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
             val menuItems = arrayOf("삭제하기") // 메뉴 항목 배열
 
             MaterialAlertDialogBuilder(view.context)
@@ -51,7 +51,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
                     when (which) {
                         0 -> {
                             // "삭제하기" 메뉴 항목 클릭 처리
-                            showDeleteConfirmationDialog(view, postWithComments)
+                            showDeleteConfirmationDialog(view, postWithTagsAndComments)
                         }
                     }
                     dialog.dismiss()
@@ -60,12 +60,12 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
         }
 
         // 삭제 버튼은 한번 더 확인 다이얼로그를 띄움
-        private fun showDeleteConfirmationDialog(view: View, postWithComments: PostWithComments) {
+        private fun showDeleteConfirmationDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
             // 통일된 사용자 경험을 위해 [확인 / 취소] 순서로 변경
             MaterialAlertDialogBuilder(view.context)
                 .setMessage("게시글을 삭제하시겠습니까?")
                 .setNegativeButton("확인") { dialog, _ ->
-                    listener.onDeletePostClicked(postWithComments)
+                    listener.onDeletePostClicked(postWithTagsAndComments)
                     dialog.dismiss()
                 }
                 .setPositiveButton("취소") { dialog, _ ->
@@ -83,8 +83,8 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
         }
 
-        fun bind(postWithComments: PostWithComments) {
-            binding.postDto = postWithComments.post
+        fun bind(postWithTagsAndComments: PostWithTagsAndComments) {
+            binding.post = postWithTagsAndComments.post
         }
     }
 
@@ -103,14 +103,14 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val postWithComments = getItem(position)
+        val postWithTagsAndComments = getItem(position)
 
         when (holder) {
             is LinearViewHolder -> {
-                holder.bind(postWithComments!!)
+                holder.bind(postWithTagsAndComments!!)
             }
             is GridViewHolder -> {
-                holder.bind(postWithComments!!)
+                holder.bind(postWithTagsAndComments!!)
             }
         }
     }
@@ -120,12 +120,12 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
     }
 
     companion object {
-        val diffUtil = object : DiffUtil.ItemCallback<PostWithComments>() {
-            override fun areItemsTheSame(oldItem: PostWithComments, newItem: PostWithComments): Boolean {
+        val diffUtil = object : DiffUtil.ItemCallback<PostWithTagsAndComments>() {
+            override fun areItemsTheSame(oldItem: PostWithTagsAndComments, newItem: PostWithTagsAndComments): Boolean {
                 return oldItem.post.postId == newItem.post.postId
             }
 
-            override fun areContentsTheSame(oldItem: PostWithComments, newItem: PostWithComments): Boolean {
+            override fun areContentsTheSame(oldItem: PostWithTagsAndComments, newItem: PostWithTagsAndComments): Boolean {
                 return oldItem == newItem
             }
         }
@@ -134,7 +134,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
 
 interface PostItemClickListener {
-    fun onGetCommentClicked(postWithComments: PostWithComments)
-    fun onPostImageClicked(postWithComments: PostWithComments)
-    fun onDeletePostClicked(postWithComments: PostWithComments)
+    fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments)
 }

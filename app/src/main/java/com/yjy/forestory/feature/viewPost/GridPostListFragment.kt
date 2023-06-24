@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import EventObserver
 import android.content.Intent
@@ -9,11 +9,12 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentGridPostListBinding
-import com.yjy.forestory.model.db.dto.PostWithComments
+import com.yjy.forestory.model.PostWithTagsAndComments
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,10 +33,18 @@ class GridPostListFragment : Fragment() {
         binding.lifecycleOwner = this@GridPostListFragment
         binding.postViewModel = postViewModel
 
-        binding.recyclerViewPosts.adapter = PostAdapter(postItemClickListener, false)
+        setRecyclerViewAdapter()
+        setObserver()
+
+        return binding.root
+    }
+
+
+    private fun setRecyclerViewAdapter() {
+        val recyclerViewAdapter = PostAdapter(postItemClickListener, false)
+        binding.recyclerViewPosts.adapter = recyclerViewAdapter
 
         // 리사이클러뷰 Adapter의 로딩 상태를 감지하여 프로그레스 보여주기
-        val recyclerViewAdapter = binding.recyclerViewPosts.adapter as PostAdapter
         recyclerViewAdapter.addLoadStateListener { loadState ->
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
@@ -46,20 +55,26 @@ class GridPostListFragment : Fragment() {
                 binding.recyclerViewPosts.smoothScrollToPosition(0)
             }
         })
+    }
 
-        return binding.root
+    private fun setObserver() {
+        // 게시글이 존재하지 않으면 안내 메시지를 띄운다
+        postViewModel.postCount.observe(viewLifecycleOwner, Observer {
+            binding.imageViewInfo.isVisible = (it <= 0)
+            binding.textViewInfo.isVisible = (it <= 0)
+        })
     }
 
     private val postItemClickListener = object : PostItemClickListener {
         // 이미지 클릭 리스너 재정의
-        override fun onPostImageClicked(postWithComments: PostWithComments) {
+        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments) {
             val intent = Intent(activity, PostActivity::class.java)
-            intent.putExtra("postId", postWithComments.post.postId)
+            intent.putExtra("postId", postWithTagsAndComments.post.postId)
             startActivity(intent)
             activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
         }
 
-        override fun onGetCommentClicked(postWithComments: PostWithComments) {}
-        override fun onDeletePostClicked(postWithComments: PostWithComments) {}
+        override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
+        override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
     }
 }

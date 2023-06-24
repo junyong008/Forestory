@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.addPost
 
 import EventObserver
 import android.Manifest
@@ -30,7 +30,7 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
     private val addPostViewModel: AddPostViewModel by viewModels()
 
     private var mToast: StyleableToast? = null
-    private val loadingDialog = LoadingDialog()
+    private var loadingDialog: LoadingDialog? = null
 
     companion object {
         private const val CONFIRM_DIALOG_CODE_DELETE_PHOTO = 0
@@ -83,14 +83,17 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
             }
         })
 
+        // 로딩 상태 확인하여 로딩 다이얼로그 띄우기
         addPostViewModel.isLoading.observe(this, Observer { isLoading ->
-            val checkPrevDialog = supportFragmentManager.findFragmentByTag(LoadingDialog.TAG) // 기존 Dialog가 없는데도 dismiss하면 IllegalStateException이 뜨므로, 이전 Dialog가 있는지 검사
+            loadingDialog?.let { it.dismiss() }
+
             if (isLoading) {
-                loadingDialog.show(this.supportFragmentManager, LoadingDialog.TAG)
-            } else if (checkPrevDialog != null) {
-                loadingDialog.dismiss()
+                loadingDialog = LoadingDialog().also {
+                    it.show(this.supportFragmentManager, LoadingDialog.TAG)
+                }
             }
         })
+
     }
 
     private fun setEventObserver() {

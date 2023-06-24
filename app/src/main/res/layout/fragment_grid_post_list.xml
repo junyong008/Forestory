@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="postViewModel"
-            type="com.yjy.forestory.feature.post.PostViewModel" />
+            type="com.yjy.forestory.feature.viewPost.PostViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,7 +16,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_posts"
-            postItems="@{postViewModel.allPosts}"
+            postItems="@{postViewModel.postWithTagsAndCommentsList}"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:overScrollMode="never"
@@ -37,6 +37,33 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView_info"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.350"
+            app:srcCompat="@drawable/ic_park" />
+
+        <TextView
+            android:id="@+id/textView_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:gravity="center"
+            android:text="아직 스토리가 없습니다.\n새로운 스토리를 남겨보세요!"
+            android:textColor="@color/gray"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView_info" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

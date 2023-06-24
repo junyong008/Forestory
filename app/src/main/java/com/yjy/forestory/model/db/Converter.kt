@@ -2,8 +2,6 @@ package com.yjy.forestory.model.db
 
 import android.net.Uri
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.util.*
 
 class Converter {
@@ -16,19 +14,6 @@ class Converter {
     @TypeConverter
     fun toUri(uriString: String): Uri {
         return Uri.parse(uriString)
-    }
-
-    // List<String>(실사용) <-> String(DB) 변환
-    @TypeConverter
-    fun fromList(list: List<String>?): String {
-        val gson = Gson()
-        return gson.toJson(list)
-    }
-    @TypeConverter
-    fun toList(string: String): List<String>? {
-        val gson = Gson()
-        val type = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(string, type)
     }
 
     // Data(실사용) <-> Long(DB) 변환

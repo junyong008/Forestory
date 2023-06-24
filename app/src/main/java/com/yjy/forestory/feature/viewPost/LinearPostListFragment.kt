@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.post
+package com.yjy.forestory.feature.viewPost
 
 import EventObserver
 import android.content.Intent
@@ -9,11 +9,12 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
-import com.yjy.forestory.model.db.dto.PostWithComments
+import com.yjy.forestory.model.PostWithTagsAndComments
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
 import kotlinx.coroutines.delay
@@ -36,9 +37,18 @@ class LinearPostListFragment : Fragment() {
         binding.lifecycleOwner = this@LinearPostListFragment
         binding.postViewModel = postViewModel
 
-        // 리사이클러뷰 Adapter 등록, postItemClickListener 리스너를 등록하여 클릭 이벤트 처리
-        // 왜 DialogFragment는 직접 인터페이스 리스너를 상속받아 override 했는가 하면.. -> 이건 Configuration Change가 발생하더라도 다시 onCreateView에서 어댑터를 연결하면서 리스너가 등록된다.
-        // DialogFragment는 onCreate에서 할당하는게 아니기에, 띄워져 있는 상태에서 CC 가 발생하면 리스너 등록이 안된다.
+        setRecyclerViewAdapter()
+        setObserver()
+        setEventObserver()
+
+        return binding.root
+    }
+
+
+    private fun setRecyclerViewAdapter() {
+        /* 리사이클러뷰 Adapter 등록, postItemClickListener 리스너를 등록하여 클릭 이벤트 처리
+        왜 DialogFragment는 직접 인터페이스 리스너를 상속받아 override 했는가 하면.. -> 이건 Configuration Change가 발생하더라도 다시 onCreateView에서 어댑터를 연결하면서 리스너가 등록된다.
+        DialogFragment는 onCreate에서 할당하는게 아니기에, 띄워져 있는 상태에서 CC 가 발생하면 리스너 등록이 안된다.*/
         val recyclerViewAdapter = PostAdapter(postItemClickListener, true)
         binding.recyclerViewPosts.adapter = recyclerViewAdapter
 
@@ -46,10 +56,14 @@ class LinearPostListFragment : Fragment() {
         recyclerViewAdapter.addLoadStateListener { loadState ->
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
+    }
 
-        setEventObserver()
-
-        return binding.root
+    private fun setObserver() {
+        // 게시글이 존재하지 않으면 안내 메시지를 띄운다
+        postViewModel.postCount.observe(viewLifecycleOwner, Observer {
+            binding.imageViewInfo.isVisible = (it <= 0)
+            binding.textViewInfo.isVisible = (it <= 0)
+        })
     }
 
     private fun setEventObserver() {
@@ -75,20 +89,20 @@ class LinearPostListFragment : Fragment() {
 
     private val postItemClickListener = object : PostItemClickListener {
         // 댓글 추가 버튼 클릭 리스너 재정의
-        override fun onGetCommentClicked(postWithComments: PostWithComments) {
-            postViewModel.getComments(postWithComments)
+        override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+            postViewModel.getComments(postWithTagsAndComments)
         }
 
         // 이미지 클릭 리스너 재정의
-        override fun onPostImageClicked(postWithComments: PostWithComments) {
+        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments) {
             val intent = Intent(activity, ImageZoomActivity::class.java)
-            intent.putExtra("imageUri", postWithComments.post.image.toString())
+            intent.putExtra("imageUri", postWithTagsAndComments.post.image.toString())
             startActivity(intent)
         }
 
         // 게시글 삭제 클릭 리스너 재정의
-        override fun onDeletePostClicked(postWithComments: PostWithComments) {
-            postViewModel.deletePost(postWithComments)
+        override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+            postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
         }
     }
 }
