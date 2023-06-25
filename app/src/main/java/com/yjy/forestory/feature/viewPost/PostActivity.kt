@@ -3,20 +3,23 @@ package com.yjy.forestory.feature.viewPost
 import EventObserver
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ActivityPostBinding
+import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.util.BindingAdapter.setCommentAddButtonState
 import com.yjy.forestory.util.BindingAdapter.setCommentItems
 import com.yjy.forestory.util.BindingAdapter.setFormattedDateTime
 import com.yjy.forestory.util.BindingAdapter.setImageUri
-import com.yjy.forestory.util.BindingAdapter.setReadOnlyChips
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
 import javax.inject.Inject
@@ -28,6 +31,7 @@ class PostActivity : AppCompatActivity() {
     @Inject lateinit var postViewModel: PostViewModel
 
     private var postId: Int = -1
+    private var isRecursion: Boolean = false
     private var mToast: StyleableToast? = null
 
     // 시스템의 뒤로가기 버튼 눌렀을 때
@@ -53,6 +57,9 @@ class PostActivity : AppCompatActivity() {
         if (postId == -1) {
             onBackPressedCallback.handleOnBackPressed()
         }
+
+        // 재귀 인지 확인. 검색 -> 태그 클릭 -> 검색 -> 태그 클릭 ... 재귀를 방지하기 위함
+        isRecursion = intent.getBooleanExtra("recursion", false)
 
         setOnClickListener()
         setObserver()
@@ -82,11 +89,33 @@ class PostActivity : AppCompatActivity() {
             binding.textViewUserName.text = postWithTagsAndComments.post.userName
             setFormattedDateTime(binding.textViewCreateDate, postWithTagsAndComments.post.createDate)
             setImageUri(binding.imageViewPost, postWithTagsAndComments.post.image)
-            setReadOnlyChips(binding.chipgroupTags, postWithTagsAndComments.tags)
             binding.textViewContent.text = postWithTagsAndComments.post.content
             setCommentItems(binding.recyclerViewComments, postWithTagsAndComments.comments)
             setCommentAddButtonState(binding.buttonAddComment, postWithTagsAndComments)
             binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
+
+            val chipGroup = binding.chipgroupTags
+            val chipTexts = postWithTagsAndComments.tags
+            chipGroup.removeAllViews()
+            chipTexts?.let {
+                for (chipText in chipTexts) {
+
+                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
+                    newChip.id = ViewCompat.generateViewId()
+                    newChip.text = chipText.content
+                    if (!isRecursion) {
+                        newChip.setOnClickListener {
+
+                            // Chip 태그 클릭시 해당 태그 검색.
+                            val intent = Intent(this, SearchActivity::class.java)
+                            intent.putExtra("tag", chipText.content)
+                            startActivity(intent)
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
+                        }
+                    }
+                    chipGroup.addView(newChip)
+                }
+            }
 
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {

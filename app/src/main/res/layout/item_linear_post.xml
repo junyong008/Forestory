@@ -108,7 +108,6 @@
                     app:alignContent="space_around"
                     app:alignItems="stretch"
                     app:flexWrap="wrap"
-                    readOnlyChips="@{postWithTagsAndComments.tags}"
                     android:background="@drawable/bg_lightgray_round_bottom"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

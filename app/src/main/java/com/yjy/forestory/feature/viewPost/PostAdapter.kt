@@ -3,11 +3,14 @@ package com.yjy.forestory.feature.viewPost
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ItemGridPostBinding
 import com.yjy.forestory.databinding.ItemLinearPostBinding
 import com.yjy.forestory.model.PostWithTagsAndComments
@@ -21,17 +24,17 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
         init {
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
-                listener.onGetCommentClicked(getItem(adapterPosition)!!)
+                listener.onGetCommentClicked(getItem(absoluteAdapterPosition)!!)
             }
 
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
-                listener.onPostImageClicked(getItem(adapterPosition)!!)
+                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!)
             }
 
             // 옵션 메뉴 클릭 리스너
             binding.ibuttonMenu.setOnClickListener {
-                showMenuDialog(binding.ibuttonMenu, getItem(adapterPosition)!!)
+                showMenuDialog(binding.ibuttonMenu, getItem(absoluteAdapterPosition)!!)
             }
         }
 
@@ -39,6 +42,23 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
             // 댓글이 없고 만약 추가중이라면 프로그레스 띄우기
             binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
+
+            // 태그 Chip 바인딩. 클릭시 태그 검색 기능 제공을 위해 리스너 전달
+            val chipGroup = binding.chipgroupTags
+            val chipTexts = postWithTagsAndComments.tags
+            chipGroup.removeAllViews()
+            chipTexts?.let {
+                for (chipText in chipTexts) {
+                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
+                    newChip.id = ViewCompat.generateViewId()
+                    newChip.text = chipText.content
+                    newChip.setOnClickListener {
+                        listener.onTagChipClicked(chipText.content)
+                    }
+                    chipGroup.addView(newChip)
+                }
+            }
+
             binding.postWithTagsAndComments = postWithTagsAndComments
         }
 
@@ -79,7 +99,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
         init {
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
-                listener.onPostImageClicked(getItem(adapterPosition)!!)
+                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!)
             }
         }
 
@@ -137,4 +157,5 @@ interface PostItemClickListener {
     fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments)
     fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments)
     fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onTagChipClicked(tagText: String)
 }

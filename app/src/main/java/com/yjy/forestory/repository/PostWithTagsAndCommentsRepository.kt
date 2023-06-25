@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.yjy.forestory.R
 import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.model.Tag
 import com.yjy.forestory.model.db.dao.PostWithTagsAndCommentsDao
 import com.yjy.forestory.model.db.entity.CommentEntity
 import com.yjy.forestory.model.db.entity.PostEntity
@@ -24,8 +25,12 @@ import java.util.*
 class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsDao: PostWithTagsAndCommentsDao): PostWithTagsAndCommentsRepository {
 
     // Post
-    override fun getPostCount(): Flow<Int> {
-        return postWithTagsAndCommentsDao.getPostCount()
+    override fun getPostCount(keyword: String?): Flow<Int> {
+        return postWithTagsAndCommentsDao.getPostCount(keyword)
+    }
+
+    override fun getPostCountByTag(keytag: String?): Flow<Int> {
+        return postWithTagsAndCommentsDao.getPostCountByTag(keytag)
     }
 
     @WorkerThread
@@ -94,6 +99,10 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
 
 
     // Tag
+    @WorkerThread
+    override suspend fun getTagList(keyword: String): List<Tag> {
+        return postWithTagsAndCommentsDao.getTagList(keyword).map { it.toTag() }
+    }
 
 
 
@@ -112,7 +121,7 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
 
 
     // Transaction
-    override fun getPostWithTagsAndCommentsList(): Flow<PagingData<PostWithTagsAndComments>> {
+    override fun getPostWithTagsAndCommentsList(keyword: String?): Flow<PagingData<PostWithTagsAndComments>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 15, // 페이지당 불러올 항목 갯수
@@ -123,7 +132,20 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
                  */
             ),
             pagingSourceFactory = {
-                postWithTagsAndCommentsDao.getPostWithTagsAndCommentsList()
+                postWithTagsAndCommentsDao.getPostWithTagsAndCommentsList(keyword)
+            }
+        ).flow
+            .map { pagingData -> pagingData.map { entity -> entity.toPostWithTagsAndComments() } }
+    }
+
+    override fun getPostWithTagsAndCommentsListByTag(keytag: String?): Flow<PagingData<PostWithTagsAndComments>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 15,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                postWithTagsAndCommentsDao.getPostWithTagsAndCommentsListByTag(keytag)
             }
         ).flow
             .map { pagingData -> pagingData.map { entity -> entity.toPostWithTagsAndComments() } }
@@ -161,16 +183,19 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
 
 interface PostWithTagsAndCommentsRepository {
     // Post
-    fun getPostCount(): Flow<Int>
+    fun getPostCount(keyword: String? = null): Flow<Int>
+    fun getPostCountByTag(keytag: String?): Flow<Int>
     suspend fun updatePostIsAddingComments(value: Int, postId: Int? = null)
 
     // Comment
     suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, postImage: MultipartBody.Part?): Int
 
     // Tag
+    suspend fun getTagList(keyword: String): List<Tag>
 
     // Transaction
-    fun getPostWithTagsAndCommentsList(): Flow<PagingData<PostWithTagsAndComments>>
+    fun getPostWithTagsAndCommentsList(keyword: String? = null): Flow<PagingData<PostWithTagsAndComments>>
+    fun getPostWithTagsAndCommentsListByTag(keytag: String?): Flow<PagingData<PostWithTagsAndComments>>
     fun getPostWithTagsAndComments(postId: Int): Flow<PostWithTagsAndComments?>
     suspend fun insertPostWithTags(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean
     suspend fun deletePostWithTagsAndComments(postWithTagsAndComments: PostWithTagsAndComments?): Boolean

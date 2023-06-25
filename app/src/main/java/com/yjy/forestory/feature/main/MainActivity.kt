@@ -9,7 +9,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ActivityMainBinding
-import com.yjy.forestory.feature.post.AddPostActivity
+import com.yjy.forestory.feature.addPost.AddPostActivity
+import com.yjy.forestory.feature.searchPost.SearchActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,6 +37,13 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, AddPostActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
+        }
+
+        // 검색 버튼 클릭
+        binding.ibuttonSearch.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
         }
     }
 

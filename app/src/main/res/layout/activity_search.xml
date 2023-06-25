@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="searchViewModel"
+            type="com.yjy.forestory.feature.searchPost.SearchViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_lightgray_round"
+            android:gravity="center_vertical"
+            android:hint="스토리 검색 (# 태그 검색)"
+            android:textColorHint="@color/darkgray"
+            android:maxLength="1000"
+            android:padding="15dp"
+            android:paddingStart="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:text="@={searchViewModel.searchText}"
+            android:onTextChanged="@{(text, start, before, count) -> searchViewModel.onSearchTextChanged(text)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ibutton_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/ripple_effect"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_search"
+            app:layout_constraintStart_toStartOf="@+id/edit_search"
+            app:layout_constraintTop_toTopOf="@+id/edit_search"
+            app:srcCompat="@drawable/ic_back" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ibutton_deleteText"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/ripple_effect"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_search"
+            app:layout_constraintEnd_toEndOf="@+id/edit_search"
+            app:layout_constraintTop_toTopOf="@+id/edit_search"
+            app:srcCompat="@drawable/ic_cancel" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:chipBackgroundColor="@color/lightgreen"
+            app:closeIconEnabled="true"
+            app:closeIconTint="@color/white"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_search"
+            app:layout_constraintStart_toEndOf="@+id/ibutton_close"
+            app:layout_constraintTop_toTopOf="@+id/edit_search" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_tags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:overScrollMode="never"
+            searchTagItems="@{searchViewModel.tagList}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edit_search" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_posts"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:overScrollMode="never"
+            searchPostItems="@{searchViewModel.searchPostWithTagsAndCommentsList}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edit_search" />
+
+        <TextView
+            android:id="@+id/textView_notfound"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:gravity="center"
+            android:text="검색 결과가 없습니다"
+            android:textColor="@color/gray"
+            android:textSize="15sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recyclerView_posts" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recyclerView_posts" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -16,6 +16,8 @@ import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yjy.forestory.R
+import com.yjy.forestory.feature.searchPost.SearchPostAdapter
+import com.yjy.forestory.feature.searchPost.SearchTagAdapter
 import com.yjy.forestory.feature.viewPost.CommentAdapter
 import com.yjy.forestory.feature.viewPost.PostAdapter
 import com.yjy.forestory.model.Comment
@@ -32,8 +34,9 @@ object BindingAdapter {
     @BindingAdapter("postItems")
     @JvmStatic
     fun setPostItems(recyclerView: RecyclerView, pagingData: PagingData<PostWithTagsAndComments>?) {
+
         pagingData?.let {
-            val postAdapter = recyclerView.adapter as PostAdapter // 이 부분은 PostAdapter를 PagingDataAdapter로 변경해야 합니다.
+            val postAdapter = recyclerView.adapter as PostAdapter
 
             // lifecycleScope를 통해 submitData()를 호출
             recyclerView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
@@ -57,6 +60,30 @@ object BindingAdapter {
 
             val commentAdapter = recyclerView.adapter as CommentAdapter
             commentAdapter.submitList(it)
+        }
+    }
+
+    @BindingAdapter("searchTagItems")
+    @JvmStatic
+    fun setSearchTagItems(recyclerView: RecyclerView, tagList: List<Tag>?){
+
+        tagList?.let {
+            val searchTagAdapter = recyclerView.adapter as SearchTagAdapter
+            searchTagAdapter.submitList(it)
+        }
+    }
+
+    @BindingAdapter("searchPostItems")
+    @JvmStatic
+    fun setSearchPostItems(recyclerView: RecyclerView, pagingData: PagingData<PostWithTagsAndComments>?){
+
+        pagingData?.let {
+            val searchPostAdapter = recyclerView.adapter as SearchPostAdapter
+
+            // lifecycleScope를 통해 submitData()를 호출
+            recyclerView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                searchPostAdapter.submitData(it)
+            }
         }
     }
 
@@ -122,24 +149,6 @@ object BindingAdapter {
                     chipGroup.removeView(newChip)
                     chipTexts.remove(chipText)
                 }
-
-                chipGroup.addView(newChip)
-            }
-        }
-    }
-
-    // chipGroup의 chip을 바인딩 : 읽기 전용 Chip 바인딩
-    @BindingAdapter("readOnlyChips")
-    @JvmStatic
-    fun setReadOnlyChips(chipGroup: ChipGroup, chipTexts: List<Tag>?) {
-
-        chipGroup.removeAllViews()
-
-        chipTexts?.let {
-            for (chipText in chipTexts) {
-                val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
-                newChip.id = ViewCompat.generateViewId()
-                newChip.text = chipText.content
 
                 chipGroup.addView(newChip)
             }

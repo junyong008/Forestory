@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
+import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
@@ -103,6 +104,14 @@ class LinearPostListFragment : Fragment() {
         // 게시글 삭제 클릭 리스너 재정의
         override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {
             postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
+        }
+
+        // 태그 클릭 리스너 재정의
+        override fun onTagChipClicked(tagText: String) {
+            val intent = Intent(activity, SearchActivity::class.java)
+            intent.putExtra("tag", tagText)
+            startActivity(intent)
+            activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
         }
     }
 }
