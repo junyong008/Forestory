@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
 import com.yjy.forestory.feature.searchPost.SearchActivity
@@ -39,6 +41,7 @@ class LinearPostListFragment : Fragment() {
         binding.postViewModel = postViewModel
 
         setRecyclerViewAdapter()
+        setOnClickListener()
         setObserver()
         setEventObserver()
 
@@ -56,6 +59,25 @@ class LinearPostListFragment : Fragment() {
         // 리사이클러뷰 Adapter의 로딩 상태를 감지하여 프로그레스 보여주기
         recyclerViewAdapter.addLoadStateListener { loadState ->
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
+        }
+
+        // 리사이클러뷰 스크롤이 맨 위가 아니라면 맨 위로 가기 버튼 보여주기
+        binding.recyclerViewPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                binding.ibuttonGoTop.isVisible = (firstVisibleItemPosition > 0)
+            }
+        })
+    }
+
+    private fun setOnClickListener() {
+        // 게시글 맨 위로 가기 버튼
+        binding.ibuttonGoTop.setOnClickListener {
+            binding.recyclerViewPosts.scrollToPosition(0)
         }
     }
 
