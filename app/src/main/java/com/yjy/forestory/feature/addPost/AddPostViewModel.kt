@@ -8,8 +8,8 @@ import androidx.activity.result.ActivityResult
 import androidx.lifecycle.*
 import com.theartofdev.edmodo.cropper.CropImage
 import com.yjy.forestory.R
-import com.yjy.forestory.repository.PostWithTagsAndCommentsRepository
-import com.yjy.forestory.repository.UserRepository
+import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
+import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.Event
 import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel

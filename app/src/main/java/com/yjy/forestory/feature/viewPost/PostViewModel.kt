@@ -6,8 +6,8 @@ import androidx.paging.cachedIn
 import com.yjy.forestory.Const.Companion.GENDER_MALE
 import com.yjy.forestory.R
 import com.yjy.forestory.model.PostWithTagsAndComments
-import com.yjy.forestory.repository.PostWithTagsAndCommentsRepository
-import com.yjy.forestory.repository.UserRepository
+import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
+import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.Event
 import com.yjy.forestory.util.ImageUtils
 import kotlinx.coroutines.flow.firstOrNull

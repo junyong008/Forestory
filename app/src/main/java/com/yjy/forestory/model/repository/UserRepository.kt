@@ -1,4 +1,4 @@
-package com.yjy.forestory.repository
+package com.yjy.forestory.model.repository
 
 import android.content.Context
 import android.net.Uri

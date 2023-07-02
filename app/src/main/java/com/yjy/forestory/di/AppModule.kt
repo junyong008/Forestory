@@ -2,7 +2,7 @@ package com.yjy.forestory.di
 
 import android.content.Context
 import com.yjy.forestory.model.db.ForestoryDatabase
-import com.yjy.forestory.repository.*
+import com.yjy.forestory.model.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

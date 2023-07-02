@@ -5,7 +5,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.model.Tag
-import com.yjy.forestory.repository.PostWithTagsAndCommentsRepository
+import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
