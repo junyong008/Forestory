@@ -2,12 +2,14 @@ package com.yjy.forestory.feature.viewPost
 
 import EventObserver
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.chip.Chip
@@ -37,8 +39,18 @@ class PostActivity : AppCompatActivity() {
     // 시스템의 뒤로가기 버튼 눌렀을 때
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            finish()
-            overridePendingTransition(R.anim.stay, R.anim.slide_out_right)
+            // 이미지뷰가 시야에 보이면 축소 애니메이션 적용, 아니라면 fade out 시킨다
+            val scrollBounds = Rect()
+            binding.recyclerViewComments.getHitRect(scrollBounds)
+            if (binding.imageViewPost.getGlobalVisibleRect(scrollBounds) && postId != -1) {
+                finishAfterTransition()
+            } else {
+                window.sharedElementsUseOverlay = false
+                window.sharedElementExitTransition = null
+                window.sharedElementEnterTransition = null
+                finish()
+                overridePendingTransition(R.anim.stay, R.anim.fade_out)
+            }
         }
     }
 
@@ -51,6 +63,12 @@ class PostActivity : AppCompatActivity() {
 
         // 뒤로가기 버튼 콜백 등록
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        // 이미지가 그려진 후 애니메이션을 적용
+        postponeEnterTransition()
+        binding.imageViewPost.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
 
         // 어떤 게시글을 보여줄지 Id를 받아온다. 정상적으로 못받아왔다면 뒤로가기
         postId = intent.getIntExtra("postId", -1)
@@ -80,6 +98,7 @@ class PostActivity : AppCompatActivity() {
 
             // 게시글 정보를 불러오지 못했으면 뒤로가기
             if (postWithTagsAndComments == null) {
+                postId = -1
                 onBackPressedCallback.handleOnBackPressed()
                 return@observe
             }

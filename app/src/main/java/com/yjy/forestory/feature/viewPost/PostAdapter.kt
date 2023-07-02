@@ -3,6 +3,7 @@ package com.yjy.forestory.feature.viewPost
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
@@ -28,8 +29,8 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
 
             // 이미지 클릭 리스너
-            binding.imageViewPost.setOnClickListener {
-                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!)
+            binding.imageViewPost.setOnClickListener { view ->
+                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!, view as ImageView)
             }
 
             // 옵션 메뉴 클릭 리스너
@@ -98,8 +99,8 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
     inner class GridViewHolder(private val binding: ItemGridPostBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             // 이미지 클릭 리스너
-            binding.imageViewPost.setOnClickListener {
-                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!)
+            binding.imageViewPost.setOnClickListener { view ->
+                listener.onPostImageClicked(getItem(absoluteAdapterPosition)!!, view as ImageView)
             }
         }
 
@@ -155,7 +156,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
 interface PostItemClickListener {
     fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments)
-    fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView)
     fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments)
     fun onTagChipClicked(tagText: String)
 }

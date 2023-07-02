@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -67,14 +69,16 @@ class GridPostListFragment : Fragment() {
 
     private val postItemClickListener = object : PostItemClickListener {
         // 이미지 클릭 리스너 재정의
-        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView) {
             val intent = Intent(activity, PostActivity::class.java)
             intent.putExtra("postId", postWithTagsAndComments.post.postId)
-            startActivity(intent)
-            activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
+
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), imageView, "postImage")
+            requireActivity().startActivity(intent, options.toBundle())
         }
 
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
         override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
+        override fun onTagChipClicked(tagText: String) {}
     }
 }

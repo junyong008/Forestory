@@ -35,6 +35,7 @@
                     android:background="@drawable/bg_lightgray_round"
                     android:clipToOutline="true"
                     android:scaleType="centerCrop"
+                    android:transitionName="postImage"
                     imageUri="@{postWithTagsAndComments.post.image}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="1:1"

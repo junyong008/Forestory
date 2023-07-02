@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -117,7 +118,7 @@ class LinearPostListFragment : Fragment() {
         }
 
         // 이미지 클릭 리스너 재정의
-        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+        override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView) {
             val intent = Intent(activity, ImageZoomActivity::class.java)
             intent.putExtra("imageUri", postWithTagsAndComments.post.image.toString())
             startActivity(intent)

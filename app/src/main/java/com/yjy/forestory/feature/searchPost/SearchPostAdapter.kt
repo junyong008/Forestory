@@ -5,6 +5,7 @@ import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -23,7 +24,7 @@ class SearchPostAdapter(private val listener: SearchPostItemClickListener) : Pag
     inner class MyViewHolder(private val binding: ItemSearchPostBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             binding.cardView.setOnClickListener {
-                listener.onPostClicked(getItem(absoluteAdapterPosition)!!)
+                listener.onPostClicked(getItem(absoluteAdapterPosition)!!, binding.imageViewPost)
             }
         }
 
@@ -94,6 +95,6 @@ class SearchPostAdapter(private val listener: SearchPostItemClickListener) : Pag
 }
 
 interface SearchPostItemClickListener {
-    fun onPostClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onPostClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView)
     fun onTagChipClicked(tagText: String)
 }

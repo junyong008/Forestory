@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -165,12 +167,13 @@ class SearchActivity : AppCompatActivity() {
 
     private val searchPostItemClickListener = object : SearchPostItemClickListener {
         // 포스트 클릭 리스너 재정의
-        override fun onPostClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+        override fun onPostClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView) {
             val intent = Intent(this@SearchActivity, PostActivity::class.java)
             intent.putExtra("postId", postWithTagsAndComments.post.postId)
             intent.putExtra("recursion", true) // 재귀 방지. 검색 -> 태그 클릭 -> 검색 -> 태그 클릭 ...
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
+
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this@SearchActivity, imageView, "postImage")
+            startActivity(intent, options.toBundle())
         }
 
         // 각 포스트 내의 태그 Chip 클릭 리스너 재정의 : 태그 재검색
