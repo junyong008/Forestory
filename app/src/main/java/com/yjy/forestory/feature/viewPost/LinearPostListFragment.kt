@@ -1,6 +1,8 @@
 package com.yjy.forestory.feature.viewPost
 
 import EventObserver
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -62,15 +64,40 @@ class LinearPostListFragment : Fragment() {
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
 
-        // 리사이클러뷰 스크롤이 맨 위가 아니라면 맨 위로 가기 버튼 보여주기
+        // 리사이클러뷰 스크롤이 맨 위가 아니고 스크롤을 위로 올리고 있다면 맨 위로 가기 버튼 보여주기
         binding.recyclerViewPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var isButtonVisible = false
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-                binding.ibuttonGoTop.isVisible = (firstVisibleItemPosition > 0)
+                val shouldShowButton = (firstVisibleItemPosition > 0 && dy < 0)
+                if (shouldShowButton != isButtonVisible) {
+                    isButtonVisible = shouldShowButton
+                    if (isButtonVisible) {
+                        binding.ibuttonGoTop.animate()
+                            .alpha(1.0f)
+                            .setDuration(200)
+                            .setListener(null)
+                            .translationY(0f)
+                            .start()
+                        binding.ibuttonGoTop.visibility = View.VISIBLE
+                    } else {
+                        binding.ibuttonGoTop.animate()
+                            .alpha(0.0f)
+                            .setDuration(200)
+                            .setListener(object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator) {
+                                    binding.ibuttonGoTop.visibility = View.GONE
+                                }
+                            })
+                            .translationY(binding.ibuttonGoTop.height.toFloat())
+                            .start()
+                    }
+                }
             }
         })
     }
