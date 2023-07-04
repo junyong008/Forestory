@@ -60,7 +60,6 @@ class SearchActivity : AppCompatActivity() {
 
         // 태그 클릭으로 인한 유입이라면 바로 태그를 검색해서 보여주고, 아니라면 포커스를 잡아 키보드를 띄운다
         if (searchTag != null) {
-            searchViewModel.searchText.value = "#$searchTag"
             searchViewModel.searchPostsByTag(searchTag!!)
         } else {
             binding.editSearch.requestFocus()
@@ -79,8 +78,8 @@ class SearchActivity : AppCompatActivity() {
         }
 
         // 포커스가 잡히면 현재 검색한 태그를 비우기 : 태그 클릭으로 인한 유입시 setOnClickListener가 두번째 클릭부터 동작함. 그래서 이걸로 보충
-        binding.editSearch.setOnFocusChangeListener { v, hasFocus ->
-            searchViewModel.emptyKeytag()
+        binding.editSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) { searchViewModel.emptyKeytag() }
         }
     }
 
@@ -154,6 +153,7 @@ class SearchActivity : AppCompatActivity() {
         val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         this.currentFocus?.let {
             imm.hideSoftInputFromWindow(it.windowToken, 0)
+            it.clearFocus() // 포커스가 잡힌 뷰의 포커스를 해제한다
         }
     }
 

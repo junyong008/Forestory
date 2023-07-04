@@ -26,7 +26,8 @@ class SearchViewModel @Inject constructor(
     fun onSearchTextChanged(text: CharSequence) {
         viewModelScope.launch {
 
-            if (text.startsWith("#")) {
+            // 검색어가 #으로 시작하고 태그가 검색된 상황이 아닐때만 검색된 태그 목록을 보여준다
+            if (text.startsWith("#") && _currentKeytag.value.isNullOrEmpty()) {
                 val inputText = text.substring(1).trim()
                 _tagList.value = postWithTagsAndCommentsRepository.getTagList(inputText)
             } else {
@@ -95,6 +96,7 @@ class SearchViewModel @Inject constructor(
     fun searchPostsByTag(tagText: String) {
         _currentKeyword.value = ""
         _currentKeytag.value = tagText
+        searchText.value = "#${tagText}"
         _tagList.value = emptyList()
     }
 
