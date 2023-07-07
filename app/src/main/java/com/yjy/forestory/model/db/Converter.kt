@@ -16,7 +16,7 @@ class Converter {
         return Uri.parse(uriString)
     }
 
-    // Data(실사용) <-> Long(DB) 변환
+    // Date(실사용) <-> Long(DB) 변환
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? {
         return value?.let { Date(it) }

@@ -3,6 +3,8 @@ package com.yjy.forestory.feature.searchPost
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
@@ -53,6 +55,7 @@ class SearchActivity : AppCompatActivity() {
         setSearchEdit()
         setRecyclerViewAdapter()
         setOnClickListener()
+        setOnTextChanged()
         setObserver()
     }
 
@@ -69,7 +72,7 @@ class SearchActivity : AppCompatActivity() {
         binding.editSearch.setOnEditorActionListener { view, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
-                searchViewModel.searchPosts() // 검색. 검색 결과는 바로 리사이클러뷰에 바인딩어댑터로 바인딩된다
+                searchViewModel.searchPosts(searchViewModel.searchText.value) // 검색. 검색 결과는 바로 리사이클러뷰에 바인딩어댑터로 바인딩된다
                 hideKeyboard() // 키보드 숨기기
                 true
             } else {
@@ -101,19 +104,30 @@ class SearchActivity : AppCompatActivity() {
             onBackPressedCallback.handleOnBackPressed()
         }
 
-        // 검색어 한번에 지우기 버튼 클릭
-        binding.ibuttonDeleteText.setOnClickListener {
-            binding.editSearch.setText("")
-            searchViewModel.emptyKeytag()
-        }
-
-        //Chip 닫기 버튼 or 검색창을 누르면 현재 검색한 태그를 비워서 검색이 가능하도록 설정
+        // Chip 닫기 버튼 or 검색창을 누르면 현재 검색한 태그를 비워서 검색이 가능하도록 설정
         binding.chipTag.setOnCloseIconClickListener {
             searchViewModel.emptyKeytag()
         }
         binding.editSearch.setOnClickListener {
             searchViewModel.emptyKeytag()
         }
+    }
+
+    private fun setOnTextChanged() {
+
+        // 검색창이 #으로 시작하면 태그 검색
+        binding.editSearch.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
+                if (text.startsWith("#") && searchViewModel.currentKeytag.value.isNullOrEmpty()) {
+                    val inputText = text.substring(1).trim()
+                    searchViewModel.getTagList(inputText)
+                } else {
+                    searchViewModel.emptyTagList()
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun setObserver() {

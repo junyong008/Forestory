@@ -1,8 +1,8 @@
 package com.yjy.forestory.feature.viewPost
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
@@ -10,7 +10,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ItemGridPostBinding
 import com.yjy.forestory.databinding.ItemLinearPostBinding
@@ -34,8 +33,8 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
 
             // 옵션 메뉴 클릭 리스너
-            binding.ibuttonMenu.setOnClickListener {
-                showMenuDialog(binding.ibuttonMenu, getItem(absoluteAdapterPosition)!!)
+            binding.ibuttonMenu.setOnClickListener { view ->
+                listener.onOptionClicked(getItem(absoluteAdapterPosition)!!, view as ImageButton)
             }
         }
 
@@ -48,51 +47,18 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             val chipGroup = binding.chipgroupTags
             val chipTexts = postWithTagsAndComments.tags
             chipGroup.removeAllViews()
-            chipTexts?.let {
-                for (chipText in chipTexts) {
-                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
-                    newChip.id = ViewCompat.generateViewId()
-                    newChip.text = chipText.content
-                    newChip.setOnClickListener {
-                        listener.onTagChipClicked(chipText.content)
-                    }
-                    chipGroup.addView(newChip)
+            for (chipText in chipTexts) {
+                val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
+                newChip.id = ViewCompat.generateViewId()
+                newChip.text = chipText.content
+                newChip.setOnClickListener {
+                    listener.onTagChipClicked(chipText.content)
                 }
+                chipGroup.addView(newChip)
             }
 
+
             binding.postWithTagsAndComments = postWithTagsAndComments
-        }
-
-        // 옵션 메뉴를 띄우고 해당 아이템 클릭시 리스너에 알림
-        private fun showMenuDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
-            val menuItems = arrayOf("삭제하기") // 메뉴 항목 배열
-
-            MaterialAlertDialogBuilder(view.context)
-                .setItems(menuItems) { dialog, which ->
-                    when (which) {
-                        0 -> {
-                            // "삭제하기" 메뉴 항목 클릭 처리
-                            showDeleteConfirmationDialog(view, postWithTagsAndComments)
-                        }
-                    }
-                    dialog.dismiss()
-                }
-                .show()
-        }
-
-        // 삭제 버튼은 한번 더 확인 다이얼로그를 띄움
-        private fun showDeleteConfirmationDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
-            // 통일된 사용자 경험을 위해 [확인 / 취소] 순서로 변경
-            MaterialAlertDialogBuilder(view.context)
-                .setMessage("게시글을 삭제하시겠습니까?")
-                .setNegativeButton("확인") { dialog, _ ->
-                    listener.onDeletePostClicked(postWithTagsAndComments)
-                    dialog.dismiss()
-                }
-                .setPositiveButton("취소") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
         }
     }
 
@@ -157,6 +123,6 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 interface PostItemClickListener {
     fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments)
     fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView)
-    fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments)
+    fun onOptionClicked(postWithTagsAndComments: PostWithTagsAndComments, imageButton: ImageButton)
     fun onTagChipClicked(tagText: String)
 }

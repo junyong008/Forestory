@@ -22,7 +22,7 @@ class ImageZoomActivity : AppCompatActivity() {
         }
 
         // 액션바의 제목 및 뒤로가기 버튼 설정
-        supportActionBar?.setTitle("자세히 보기")
+        supportActionBar?.setTitle(R.string.title_image_zoom)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 

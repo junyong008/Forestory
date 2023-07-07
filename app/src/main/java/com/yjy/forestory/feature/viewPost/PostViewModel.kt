@@ -4,39 +4,21 @@ import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yjy.forestory.Const.Companion.GENDER_MALE
-import com.yjy.forestory.R
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.Event
-import com.yjy.forestory.util.ImageUtils
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton // 싱글톤으로 구성하여 게시글의 조회, 수정, 삭제 등을 모두 총괄함.
 class PostViewModel @Inject constructor(
-    private val imageUtils: ImageUtils,
     private val userRepository: UserRepository,
     private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository
 ) : ViewModel() {
-
-    // ---------------------------------- 토스트 메시지 설정
-    private val _showToast = MutableLiveData<Event<Boolean>>()
-    val showToast: LiveData<Event<Boolean>> get() = _showToast
-
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage: LiveData<String> get() = _toastMessage
-
-    private val _toastIcon = MutableLiveData<Int>()
-    val toastIcon: LiveData<Int> get() = _toastIcon
-
-    private fun setToastMsg(icon: Int, msg: String) {
-        _toastIcon.value = icon
-        _toastMessage.value = msg
-        _showToast.value = Event(true)
-    }
 
     // ---------------------------------- 모든 게시글, 태그, 댓글 조회
     val postWithTagsAndCommentsList: LiveData<PagingData<PostWithTagsAndComments>> =
@@ -87,44 +69,55 @@ class PostViewModel @Inject constructor(
 
 
     // ---------------------------------- 게시글의 정보를 받아서 서버로부터 AI의 반응을 받아와 댓글을 추가
-    fun getComments(postWithTagsAndComments: PostWithTagsAndComments) {
+
+    private val _isCompleteGetComments = MutableLiveData<Event<Int>>()
+    val isCompleteGetComments: LiveData<Event<Int>> get() = _isCompleteGetComments
+
+    fun getComments(parentPostId: Int, postContent: String, postImage: MultipartBody.Part) {
         viewModelScope.launch {
-            val post = postWithTagsAndComments.post
 
             // 해당 게시글의 댓글을 현재 추가중임을 DB에 저장하여 명시
-            postWithTagsAndCommentsRepository.updatePostIsAddingComments(1, post.postId)
+            postWithTagsAndCommentsRepository.updatePostIsAddingComments(1, parentPostId)
 
             // 댓글을 불러오는데 필요한 요소들 정의
-            val parentPostId = post.postId
             val writerName = userRepository.getUserName().firstOrNull()
             val writerGender = GENDER_MALE
-            val postContent = post.content
-            val postImage = imageUtils.uriToMultipart(post.image)
+            val language = "영어"
 
-            // 결과를 받아와서 성공 실패 유무 보여주기
-            val responseCode = postWithTagsAndCommentsRepository.addComments(parentPostId, writerName, writerGender, postContent, postImage)
-            if (responseCode != 200) {
-                setToastMsg(R.style.errorToast, "ERROR : $responseCode")
-            }
+            // 댓글을 불러오고 결과 통신 코드를 이벤트로 처리
+            val responseCode: Int = postWithTagsAndCommentsRepository.addComments(parentPostId, writerName, writerGender, postContent, language, postImage)
+            _isCompleteGetComments.value = Event(responseCode)
 
             // 처리가 완료됐음을 DB에 명시
-            postWithTagsAndCommentsRepository.updatePostIsAddingComments(0, post.postId)
+            postWithTagsAndCommentsRepository.updatePostIsAddingComments(0, parentPostId)
         }
     }
 
     // ---------------------------------- 게시글 삭제
+
+    private val _isCompleteDeletePost = MutableLiveData<Event<DeletePostResult>>()
+    val isCompleteDeletePost: LiveData<Event<DeletePostResult>> get() = _isCompleteDeletePost
+
     fun deletePostWithTagsAndComments(postWithTagsAndComments: PostWithTagsAndComments) {
-
-        // 만약 댓글을 서버로부터 추가중이라면 삭제 막기
-        if (postWithTagsAndComments.post.isAddingComments) {
-            setToastMsg(R.style.errorToast, "숲속 친구들에게 알리고있는 게시글 입니다")
-            return
-        }
-
         viewModelScope.launch {
+
+            // 만약 댓글을 서버로부터 추가중이라면 삭제 막기
+            if (postWithTagsAndComments.post.isAddingComments) {
+                _isCompleteDeletePost.value = Event(DeletePostResult.CannotDelete)
+                return@launch
+            }
+
             if (postWithTagsAndCommentsRepository.deletePostWithTagsAndComments(postWithTagsAndComments)) {
-                setToastMsg(R.style.successToast, "삭제되었습니다")
+                _isCompleteDeletePost.value = Event(DeletePostResult.Success)
+            } else {
+                _isCompleteDeletePost.value = Event(DeletePostResult.Failed)
             }
         }
+    }
+
+    sealed class DeletePostResult {
+        object CannotDelete: DeletePostResult()
+        object Success: DeletePostResult()
+        object Failed: DeletePostResult()
     }
 }

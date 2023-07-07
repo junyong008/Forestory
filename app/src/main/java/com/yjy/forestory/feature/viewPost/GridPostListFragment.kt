@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
@@ -78,7 +79,7 @@ class GridPostListFragment : Fragment() {
         }
 
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
-        override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
+        override fun onOptionClicked(postWithTagsAndComments: PostWithTagsAndComments, imageButton: ImageButton) {}
         override fun onTagChipClicked(tagText: String) {}
     }
 }

@@ -1,20 +1,16 @@
 package com.yjy.forestory.util
 
 import android.net.Uri
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
-import androidx.core.view.ViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.yjy.forestory.R
 import com.yjy.forestory.feature.searchPost.SearchPostAdapter
 import com.yjy.forestory.feature.searchPost.SearchTagAdapter
@@ -92,23 +88,20 @@ object BindingAdapter {
     @JvmStatic
     fun setCommentAddButtonState(button: AppCompatButton, postWithTagsAndComments: PostWithTagsAndComments){
 
-        val commentAddButtonText = "숲속 친구들에게 알리기"
-        postWithTagsAndComments?.let {
-            // 댓글이 있다면 댓글 추가 버튼 숨기기
-            if (postWithTagsAndComments.comments.isNotEmpty()) {
-                button.visibility = View.GONE
-            } else {
-                button.visibility = View.VISIBLE
-            }
+        // 댓글이 있다면 댓글 추가 버튼 숨기기
+        if (postWithTagsAndComments.comments.isNotEmpty()) {
+            button.visibility = View.GONE
+        } else {
+            button.visibility = View.VISIBLE
+        }
 
-            // 댓글이 없고 만약 추가중이라면 버튼 비활성화
-            if (postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments) {
-                button.setText("")
-                button.isEnabled = false
-            } else {
-                button.setText(commentAddButtonText)
-                button.isEnabled = true
-            }
+        // 댓글이 없고 만약 추가중이라면 버튼 비활성화
+        if (postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments) {
+            button.text = ""
+            button.isEnabled = false
+        } else {
+            button.text = button.context.getString(R.string.notify_forest_friends)
+            button.isEnabled = true
         }
     }
 
@@ -123,6 +116,15 @@ object BindingAdapter {
         }
     }
 
+    // imageView의 이미지를 resourceId로 바인딩
+    @BindingAdapter("imageResource")
+    @JvmStatic
+    fun setImageResource(imageView: ImageView, resourceId: Int) {
+        Glide.with(imageView.context)
+            .load(resourceId)
+            .into(imageView)
+    }
+
     // textView의 텍스트를 Date로 바인딩
     @BindingAdapter("formattedDateTime")
     @JvmStatic
@@ -130,28 +132,6 @@ object BindingAdapter {
         date?.let {
             val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(it)
             textView.text = formattedDate
-        }
-    }
-
-    // chipGroup의 chip을 바인딩 : String List를 받아서 Chip의 내용을 모두 지우고 재정립
-    @BindingAdapter("chips")
-    @JvmStatic
-    fun setChips(chipGroup: ChipGroup, chipTexts: MutableList<String>?) {
-
-        chipGroup.removeAllViews()
-
-        chipTexts?.let {
-            for (chipText in chipTexts) {
-                val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_chip, chipGroup, false) as Chip
-                newChip.id = ViewCompat.generateViewId()
-                newChip.text = chipText
-                newChip.setOnCloseIconClickListener {
-                    chipGroup.removeView(newChip)
-                    chipTexts.remove(chipText)
-                }
-
-                chipGroup.addView(newChip)
-            }
         }
     }
 }

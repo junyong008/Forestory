@@ -13,6 +13,7 @@ interface CommentApi {
         @Part("writerName") writerName: RequestBody,
         @Part("writerGender") writerGender: RequestBody,
         @Part("postContent") postContent: RequestBody,
+        @Part("language") language: RequestBody,
         @Part image: MultipartBody.Part
     ) : List<CommentDto>
 }

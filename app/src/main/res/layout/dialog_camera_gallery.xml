@@ -25,7 +25,7 @@
             android:gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:text="사진 추가하기"
+            android:text="@string/add_photo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -80,7 +80,7 @@
                     android:layout_height="20dp"
                     android:fontFamily="@font/kjcgothic_bold"
                     android:gravity="center"
-                    android:text="사진 촬영"
+                    android:text="@string/take_photo"
                     android:textColor="@color/darkgray"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -109,7 +109,7 @@
                     android:layout_height="20dp"
                     android:fontFamily="@font/kjcgothic_bold"
                     android:gravity="center"
-                    android:text="앨범 선택"
+                    android:text="@string/select_album"
                     android:textColor="@color/darkgray"
                     android:textSize="16sp" />
             </LinearLayout>

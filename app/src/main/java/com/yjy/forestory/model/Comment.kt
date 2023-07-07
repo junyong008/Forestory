@@ -1,13 +1,12 @@
 package com.yjy.forestory.model
 
-import android.net.Uri
 import com.yjy.forestory.model.db.entity.CommentEntity
 
 data class Comment(
     val commentId: Int,
     val postId: Int,
     val writerName: String,
-    val writerPicture: Uri,
+    val writerPicture: Int,
     val content: String
 ) {
     fun toCommentEntity(): CommentEntity {

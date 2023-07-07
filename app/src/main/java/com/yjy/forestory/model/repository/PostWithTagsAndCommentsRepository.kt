@@ -1,4 +1,4 @@
-package com.yjy.forestory.repository
+package com.yjy.forestory.model.repository
 
 import android.net.Uri
 import androidx.annotation.WorkerThread
@@ -22,7 +22,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
 import java.util.*
 
-class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsDao: PostWithTagsAndCommentsDao): PostWithTagsAndCommentsRepository {
+class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsDao: PostWithTagsAndCommentsDao):
+    PostWithTagsAndCommentsRepository {
 
     // Post
     override fun getPostCount(keyword: String?): Flow<Int> {
@@ -42,9 +43,9 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
 
     // Comment
     @WorkerThread
-    override suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, postImage: MultipartBody.Part?): Int {
+    override suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, language: String?, postImage: MultipartBody.Part?): Int {
 
-        if (parentPostId == null || writerName == null || writerGender == null || postContent == null || postImage == null) {
+        if (parentPostId == null || writerName == null || writerGender == null || postContent == null || language == null || postImage == null) {
             return 0
         }
 
@@ -60,6 +61,7 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
                     writerName.toRequestBody("text/plain".toMediaTypeOrNull()),
                     writerGender.toRequestBody("text/plain".toMediaTypeOrNull()),
                     postContent.toRequestBody("text/plain".toMediaTypeOrNull()),
+                    language.toRequestBody("text/plain".toMediaTypeOrNull()),
                     postImage
                 )
 
@@ -79,9 +81,8 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
                     "랑이" -> R.drawable.ic_tiger
                     else -> R.drawable.ic_panda
                 }
-                val writerPicture = Uri.parse("android.resource://com.yjy.forestory/${resourceId}")
 
-                commentDto.toCommentEntity(parentPostId, writerPicture)
+                commentDto.toCommentEntity(parentPostId, resourceId)
             }
 
             postWithTagsAndCommentsDao.insertCommentList(commentEntityList)
@@ -97,26 +98,11 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
 
 
 
-
     // Tag
     @WorkerThread
     override suspend fun getTagList(keyword: String): List<Tag> {
         return postWithTagsAndCommentsDao.getTagList(keyword).map { it.toTag() }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -188,7 +174,7 @@ interface PostWithTagsAndCommentsRepository {
     suspend fun updatePostIsAddingComments(value: Int, postId: Int? = null)
 
     // Comment
-    suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, postImage: MultipartBody.Part?): Int
+    suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, language: String?, postImage: MultipartBody.Part?): Int
 
     // Tag
     suspend fun getTagList(keyword: String): List<Tag>

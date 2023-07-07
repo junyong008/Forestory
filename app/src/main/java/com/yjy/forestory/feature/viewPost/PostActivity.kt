@@ -22,6 +22,7 @@ import com.yjy.forestory.util.BindingAdapter.setCommentAddButtonState
 import com.yjy.forestory.util.BindingAdapter.setCommentItems
 import com.yjy.forestory.util.BindingAdapter.setFormattedDateTime
 import com.yjy.forestory.util.BindingAdapter.setImageUri
+import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
 import javax.inject.Inject
@@ -115,26 +116,26 @@ class PostActivity : AppCompatActivity() {
 
             val chipGroup = binding.chipgroupTags
             val chipTexts = postWithTagsAndComments.tags
+            
             chipGroup.removeAllViews()
-            chipTexts?.let {
-                for (chipText in chipTexts) {
+            for (chipText in chipTexts) {
 
-                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
-                    newChip.id = ViewCompat.generateViewId()
-                    newChip.text = chipText.content
-                    if (!isRecursion) {
-                        newChip.setOnClickListener {
+                val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
+                newChip.id = ViewCompat.generateViewId()
+                newChip.text = chipText.content
+                if (!isRecursion) {
+                    newChip.setOnClickListener {
 
-                            // Chip 태그 클릭시 해당 태그 검색.
-                            val intent = Intent(this, SearchActivity::class.java)
-                            intent.putExtra("tag", chipText.content)
-                            startActivity(intent)
-                            overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
-                        }
+                        // Chip 태그 클릭시 해당 태그 검색.
+                        val intent = Intent(this, SearchActivity::class.java)
+                        intent.putExtra("tag", chipText.content)
+                        startActivity(intent)
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
                     }
-                    chipGroup.addView(newChip)
                 }
+                chipGroup.addView(newChip)
             }
+
 
             // 이미지 클릭 리스너
             binding.imageViewPost.setOnClickListener {
@@ -150,7 +151,12 @@ class PostActivity : AppCompatActivity() {
 
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
-                postViewModel.getComments(postWithTagsAndComments)
+                val post = postWithTagsAndComments.post
+                val parentPostId = post.postId
+                val postContent = post.content
+                ImageUtils.uriToMultipart(this, post.image)?.let { postImage ->
+                    postViewModel.getComments(parentPostId, postContent, postImage)
+                }
             }
         }
 
@@ -158,19 +164,28 @@ class PostActivity : AppCompatActivity() {
 
     private fun setEventObserver() {
 
-        // 토스트 메시지 띄우기
-        postViewModel.showToast.observe(this, EventObserver {
-            mToast?.let { it.cancel() }
-
-            val toastMessage = postViewModel.toastMessage.value
-            val toastIcon = postViewModel.toastIcon.value ?: 0
-            mToast = StyleableToast.makeText(this, toastMessage, toastIcon).also { it.show() }
+        // 댓글 추가 결과 처리
+        postViewModel.isCompleteGetComments.observe(this, EventObserver { responseCode ->
+            if (responseCode != 200) {
+                mToast?.cancel()
+                mToast = StyleableToast.makeText(this, getString(R.string.add_comment_failure, responseCode), R.style.errorToast).also { it.show() }
+            }
         })
 
+        // 게시글 삭제 결과 처리
+        postViewModel.isCompleteDeletePost.observe(this, EventObserver { result ->
+            mToast?.cancel()
+            val toastMessage = when (result) {
+                is PostViewModel.DeletePostResult.CannotDelete -> getString(R.string.notify_forest_friends)
+                is PostViewModel.DeletePostResult.Success -> getString(R.string.delete_success)
+                else -> getString(R.string.delete_failure)
+            }
+            mToast = StyleableToast.makeText(this, toastMessage, R.style.errorToast).also { it.show() }
+        })
     }
 
     private fun showMenuDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
-        val menuItems = arrayOf("삭제하기") // 메뉴 항목 배열
+        val menuItems = arrayOf(getString(R.string.delete)) // 메뉴 항목 배열
 
         MaterialAlertDialogBuilder(view.context)
             .setItems(menuItems) { dialog, which ->
@@ -186,14 +201,13 @@ class PostActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
-        // 통일된 사용자 경험을 위해 [확인 / 취소] 순서로 변경
         MaterialAlertDialogBuilder(view.context)
-            .setMessage("게시글을 삭제하시겠습니까?")
-            .setNegativeButton("확인") { dialog, _ ->
-                postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
+            .setMessage(getString(R.string.confirm_delete_message))
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton("취소") { dialog, _ ->
+            .setPositiveButton(getString(R.string.confirm)) { dialog, _ ->
+                postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
                 dialog.dismiss()
             }
             .show()

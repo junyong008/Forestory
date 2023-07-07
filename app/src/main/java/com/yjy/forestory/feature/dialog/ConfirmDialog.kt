@@ -64,11 +64,11 @@ class ConfirmDialog: DialogFragment() {
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         // 안내 메시지 설정
-        binding.textViewInform.setText(informText!!)
+        binding.textViewInform.text = informText
 
         // 확인 버튼 클릭
         binding.buttonConfirm.setOnClickListener {
-            this.confirmDialogInterface?.onConfirmClick(dialogId!!)
+            this.confirmDialogInterface.onConfirmClick(dialogId)
             dismiss()
         }
 

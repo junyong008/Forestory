@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -17,10 +18,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
 import kotlinx.coroutines.delay
@@ -119,13 +122,23 @@ class LinearPostListFragment : Fragment() {
 
     private fun setEventObserver() {
 
-        // 토스트 메시지 띄우기
-        postViewModel.showToast.observe(viewLifecycleOwner, EventObserver {
-            mToast?.let { it.cancel() }
+        // 댓글 추가 결과 처리
+        postViewModel.isCompleteGetComments.observe(viewLifecycleOwner, EventObserver { responseCode ->
+            if (responseCode != 200) {
+                mToast?.cancel()
+                mToast = StyleableToast.makeText(requireContext(), getString(R.string.add_comment_failure, responseCode), R.style.errorToast).also { it.show() }
+            }
+        })
 
-            val toastMessage = postViewModel.toastMessage.value
-            val toastIcon = postViewModel.toastIcon.value ?: 0
-            mToast = StyleableToast.makeText(requireContext(), toastMessage, toastIcon).also { it.show() }
+        // 게시글 삭제 결과 처리
+        postViewModel.isCompleteDeletePost.observe(viewLifecycleOwner, EventObserver { result ->
+            mToast?.cancel()
+            val toastMessage = when (result) {
+                is PostViewModel.DeletePostResult.CannotDelete -> getString(R.string.notify_forest_friends)
+                is PostViewModel.DeletePostResult.Success -> getString(R.string.delete_success)
+                else -> getString(R.string.delete_failure)
+            }
+            mToast = StyleableToast.makeText(requireContext(), toastMessage, R.style.errorToast).also { it.show() }
         })
 
         // 스크롤 맨 위로 이동
@@ -141,7 +154,12 @@ class LinearPostListFragment : Fragment() {
     private val postItemClickListener = object : PostItemClickListener {
         // 댓글 추가 버튼 클릭 리스너 재정의
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {
-            postViewModel.getComments(postWithTagsAndComments)
+            val post = postWithTagsAndComments.post
+            val parentPostId = post.postId
+            val postContent = post.content
+            ImageUtils.uriToMultipart(requireContext(), post.image)?.let {  postImage ->
+                postViewModel.getComments(parentPostId, postContent, postImage)
+            }
         }
 
         // 이미지 클릭 리스너 재정의
@@ -151,9 +169,9 @@ class LinearPostListFragment : Fragment() {
             startActivity(intent)
         }
 
-        // 게시글 삭제 클릭 리스너 재정의
-        override fun onDeletePostClicked(postWithTagsAndComments: PostWithTagsAndComments) {
-            postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
+        // 게시글 옵션 클릭 리스너 재정의
+        override fun onOptionClicked(postWithTagsAndComments: PostWithTagsAndComments, imageButton: ImageButton) {
+            showMenuDialog(imageButton, postWithTagsAndComments)
         }
 
         // 태그 클릭 리스너 재정의
@@ -163,5 +181,34 @@ class LinearPostListFragment : Fragment() {
             startActivity(intent)
             activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
         }
+    }
+
+    // 옵션 메뉴를 띄우고 해당 아이템 클릭시 리스너에 알림
+    private fun showMenuDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
+        val menuItems = arrayOf(getString(R.string.delete)) // 메뉴 항목 배열
+
+        MaterialAlertDialogBuilder(view.context)
+            .setItems(menuItems) { dialog, which ->
+                when (which) {
+                    // "삭제하기" 메뉴 항목 클릭 처리
+                    0 -> { showDeleteConfirmationDialog(view, postWithTagsAndComments) }
+                }
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    // 삭제 버튼은 한번 더 확인 다이얼로그를 띄움
+    private fun showDeleteConfirmationDialog(view: View, postWithTagsAndComments: PostWithTagsAndComments) {
+        MaterialAlertDialogBuilder(view.context)
+            .setMessage(getString(R.string.confirm_delete_message))
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(getString(R.string.confirm)) { dialog, _ ->
+                postViewModel.deletePostWithTagsAndComments(postWithTagsAndComments)
+                dialog.dismiss()
+            }
+            .show()
     }
 }

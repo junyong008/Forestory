@@ -19,26 +19,20 @@ class SearchViewModel @Inject constructor(
     val searchText = MutableLiveData<String>()
 
     // ---------------------------------- 태그 검색
-
     private val _tagList = MutableLiveData<List<Tag>>()
     val tagList: LiveData<List<Tag>> get() = _tagList
 
-    fun onSearchTextChanged(text: CharSequence) {
+    fun getTagList(inputText: String) {
         viewModelScope.launch {
-
-            // 검색어가 #으로 시작하고 태그가 검색된 상황이 아닐때만 검색된 태그 목록을 보여준다
-            if (text.startsWith("#") && _currentKeytag.value.isNullOrEmpty()) {
-                val inputText = text.substring(1).trim()
-                _tagList.value = postWithTagsAndCommentsRepository.getTagList(inputText)
-            } else {
-                _tagList.value = emptyList()
-            }
+            _tagList.value = postWithTagsAndCommentsRepository.getTagList(inputText)
         }
+    }
+    fun emptyTagList() {
+        _tagList.value = emptyList()
     }
 
 
     // ---------------------------------- 키워드 및 태그로 게시글 검색
-
     private val _currentKeyword = MutableLiveData<String?>()
     val currentKeyword: LiveData<String?> get() = _currentKeyword
 
@@ -84,8 +78,8 @@ class SearchViewModel @Inject constructor(
     }
 
 
-    fun searchPosts() {
-        val inputText = searchText.value
+    // 게시글 내용에 키워드가 포함된 게시글 검색
+    fun searchPosts(inputText: String?) {
         if (!inputText.isNullOrEmpty()) {
             _currentKeytag.value = ""
             _currentKeyword.value = inputText
@@ -93,6 +87,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    // 특정 태그가 포함된 게시글 검색
     fun searchPostsByTag(tagText: String) {
         _currentKeyword.value = ""
         _currentKeytag.value = tagText
@@ -100,7 +95,14 @@ class SearchViewModel @Inject constructor(
         _tagList.value = emptyList()
     }
 
+    // 현재 검색된 태그를 비움
     fun emptyKeytag() {
         _currentKeytag.value = null
+    }
+
+    // 검색 텍스트와 태그를 비움
+    fun emptySearchText() {
+        searchText.value = ""
+        emptyKeytag()
     }
 }

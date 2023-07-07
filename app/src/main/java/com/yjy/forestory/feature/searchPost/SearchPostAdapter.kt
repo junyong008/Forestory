@@ -42,17 +42,16 @@ class SearchPostAdapter(private val listener: SearchPostItemClickListener) : Pag
             val chipGroup = binding.chipgroupTags
             val chipTexts = postWithTagsAndComments.tags
             chipGroup.removeAllViews()
-            chipTexts?.let {
-                for (chipText in chipTexts) {
-                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
-                    newChip.id = ViewCompat.generateViewId()
-                    newChip.text = chipText.content
-                    newChip.setOnClickListener {
-                        listener.onTagChipClicked(chipText.content)
-                    }
-                    chipGroup.addView(newChip)
+            for (chipText in chipTexts) {
+                val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_readonly_chip, chipGroup, false) as Chip
+                newChip.id = ViewCompat.generateViewId()
+                newChip.text = chipText.content
+                newChip.setOnClickListener {
+                    listener.onTagChipClicked(chipText.content)
                 }
+                chipGroup.addView(newChip)
             }
+
 
             binding.postWithTagsAndComments = postWithTagsAndComments
         }

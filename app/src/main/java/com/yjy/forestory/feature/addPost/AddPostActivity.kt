@@ -2,18 +2,25 @@ package com.yjy.forestory.feature.addPost
 
 import EventObserver
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.github.logansdk.permission.PermissionManager
+import com.google.android.material.chip.Chip
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import com.yjy.forestory.R
@@ -31,6 +38,7 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
 
     private var mToast: StyleableToast? = null
     private var loadingDialog: LoadingDialog? = null
+    private var tempCameraUri: Uri? = null
 
     companion object {
         private const val CONFIRM_DIALOG_CODE_DELETE_PHOTO = 0
@@ -55,17 +63,140 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         setOnClickListener()
+        setOnTextChanged()
         setObserver()
         setEventObserver()
     }
 
-    // ViewModel을 거치지 않고 바로 뷰의 변화를 필요로 하는 경우 아래와 같이 등록.
-    // xml에서 onClick으로 바로 ViewModel의 함수를 연결하는것은 ViewModel을 거쳐 비지니스 로직을 처리해야 할때 그렇게 하는것.
+
     private fun setOnClickListener() {
         // 닫기버튼 클릭
         binding.ibuttonClose.setOnClickListener {
             onBackPressedCallback.handleOnBackPressed()
         }
+
+        // 사진 추가 버튼 클릭
+        binding.ibuttonAddPhoto.setOnClickListener {
+
+            // 기존 사진이 존재한다면 삭제할건지 다이얼로그 제공 아니라면 카메라 or 갤러리 선택 다이얼로그 제공
+            if (addPostViewModel.currentPhoto.value != null) {
+                ConfirmDialog.newInstance(getString(R.string.confirm_delete_photo), CONFIRM_DIALOG_CODE_DELETE_PHOTO).show(supportFragmentManager, ConfirmDialog.TAG)
+            } else {
+                CameraGalleryDialog().show(supportFragmentManager, CameraGalleryDialog.TAG)
+            }
+        }
+
+        // 게시글 작성 버튼 클릭
+        binding.buttonAddpost.setOnClickListener {
+            val uploadImage = ImageUtils.copyImageToInternalStorage(this, addPostViewModel.currentPhoto.value!!)
+            val uploadContent = addPostViewModel.contentText.value
+            val uploadTags = addPostViewModel.tagList.value
+
+            if (uploadImage != null && uploadContent != null) {
+                addPostViewModel.addPost(uploadImage, uploadContent, uploadTags)
+            }
+        }
+    }
+
+    override fun onConfirmClick(dialogId: Int) {
+        when (dialogId) {
+            CONFIRM_DIALOG_CODE_DELETE_PHOTO -> {
+                addPostViewModel.setCurrentPhoto(null)
+            }
+        }
+    }
+
+    override fun onCameraClick() {
+
+        // 안드로이드 10부터는 WRITE/READ 권한 요청 필요 없음
+        val permissions =
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                arrayOf(Manifest.permission.CAMERA)
+            } else {
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+
+        PermissionManager.with(this@AddPostActivity, permissions).check { granted, denied, rejected ->
+
+            if (granted.size == permissions.size) {
+                tempCameraUri = ImageUtils.createTempImageFile(this)
+                tempCameraUri?.let {
+                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, it)
+                    selectPhotoResultLauncher.launch(intent)
+                }
+            } else {
+                mToast?.cancel()
+                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.camera_permission_denied), R.style.errorToast).also { it.show() }
+            }
+        }
+    }
+    override fun onGalleryClick() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+        selectPhotoResultLauncher.launch(intent)
+    }
+
+    // 사진을 촬영하거나 갤러리에서 선택 된 후 결과 도착
+    private val selectPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            var resultUri: Uri? = null
+
+            // 카메라로 촬영했는지, 갤러리에서 받아왔는지에 따라 Uri를 추출하는 방식이 다름
+            if (data?.data != null) {
+                resultUri = data.data as Uri
+            } else if (tempCameraUri != null) {
+                resultUri = tempCameraUri
+                tempCameraUri = null
+            }
+
+            // 정상적으로 촬영 or 선택된 이미지가 넘어왔으면 Crop 실행
+            resultUri?.let {
+                val intent = CropImage.activity(it)
+                    .setInitialCropWindowPaddingRatio(0F) // 처음 Crop 사이즈 : 꽉 채우기
+                    .setOutputCompressQuality(100) // 결과물 압축률 : 원본 유지
+                    .setGuidelines(CropImageView.Guidelines.ON) // 가이드라인 : true
+                    .getIntent(baseContext)
+                cropPhotoResultLauncher.launch(intent)
+            }
+        }
+    }
+
+    // 사진 Crop 후 결과 도착
+    private val cropPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            CropImage.getActivityResult(result.data).uri?.let {
+                addPostViewModel.setCurrentPhoto(it)
+            }
+        }
+    }
+
+    private fun setOnTextChanged() {
+        // 태그 edit 텍스트 변경 감지
+        binding.editTag.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
+                if (text.isNotEmpty() && (text.endsWith(" ") || text.endsWith("\n"))) {
+                    val inputText = text.removeSuffix("\n").trim()
+
+                    binding.editTag.setText("")
+
+                    addPostViewModel.tagList.value?.let { tagList ->
+                        if (tagList.size >= addPostViewModel.maxTagCount) {
+                            mToast?.cancel()
+                            mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.max_tag_count_info, addPostViewModel.maxTagCount), R.style.errorToast).also { it.show() }
+                            return
+                        }
+                    }
+
+                    if (inputText.isNotEmpty()) {
+                        addPostViewModel.addTag(inputText.toString())
+                    }
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun setObserver() {
@@ -83,9 +214,26 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
             }
         })
 
+        addPostViewModel.tagList.observe(this, Observer { chipTexts ->
+            val chipGroup = binding.chipgroupTags
+            chipGroup.removeAllViews()
+            chipTexts?.let {
+                for (chipText in chipTexts) {
+                    val newChip = LayoutInflater.from(chipGroup.context).inflate(R.layout.item_chip, chipGroup, false) as Chip
+                    newChip.id = ViewCompat.generateViewId()
+                    newChip.text = chipText
+                    newChip.setOnCloseIconClickListener {
+                        addPostViewModel.removeTag(chipText)
+                    }
+
+                    chipGroup.addView(newChip)
+                }
+            }
+        })
+
         // 로딩 상태 확인하여 로딩 다이얼로그 띄우기
         addPostViewModel.isLoading.observe(this, Observer { isLoading ->
-            loadingDialog?.let { it.dismiss() }
+            loadingDialog?.dismiss()
 
             if (isLoading) {
                 loadingDialog = LoadingDialog().also {
@@ -98,97 +246,16 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
 
     private fun setEventObserver() {
 
+        // 게시글 추가 작업 완료 이벤트
+        addPostViewModel.isCompleteInsert.observe(this, EventObserver { result ->
 
-        // 다이얼로그로 카메라 촬영 / 갤러리 선택 제공
-        addPostViewModel.addPhoto.observe(this, EventObserver {
-            val checkPrevDialog = supportFragmentManager.findFragmentByTag(CameraGalleryDialog.TAG) // 중복 방지로 이전에 생성된 DialogFragment가 없을때만 새로 생성
-            if (checkPrevDialog == null) {
-                val dialog = CameraGalleryDialog()
-                dialog.show(supportFragmentManager, CameraGalleryDialog.TAG)
+            mToast?.cancel()
+            if (result) {
+                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.post_added), R.style.successToast).also { it.show() }
+                onBackPressedCallback.handleOnBackPressed()
+            } else {
+                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.post_upload_failed), R.style.errorToast).also { it.show() }
             }
         })
-
-        // 다이얼로그로 사진 삭제할건지 선택 제공
-        addPostViewModel.deletePhoto.observe(this, EventObserver {
-            val checkPrevDialog = supportFragmentManager.findFragmentByTag(ConfirmDialog.TAG)
-            if (checkPrevDialog == null) {
-                val dialog = ConfirmDialog.newInstance("사진을 삭제하시겠습니까?", CONFIRM_DIALOG_CODE_DELETE_PHOTO)
-                dialog.show(this.supportFragmentManager, ConfirmDialog.TAG)
-            }
-        })
-
-        // 토스트 메시지 띄우기
-        addPostViewModel.showToast.observe(this, EventObserver {
-            mToast?.let { it.cancel() }
-
-            val toastMessage = addPostViewModel.toastMessage.value
-            val toastIcon = addPostViewModel.toastIcon.value ?: 0
-            mToast = StyleableToast.makeText(this@AddPostActivity, toastMessage, toastIcon).also { it.show() }
-        })
-
-        // 카메라 촬영 실행
-        addPostViewModel.openCamera.observe(this, EventObserver {
-            selectPhotoResultLauncher.launch(addPostViewModel.cameraIntent.value)
-        })
-
-        // 받아온 이미지 Crop 실행
-        addPostViewModel.openCrop.observe(this, EventObserver {
-            addPostViewModel.cropUri.value?.let {
-                val intent = CropImage.activity(it)
-                    .setInitialCropWindowPaddingRatio(0F) // 처음 Crop 사이즈 : 꽉 채우기
-                    .setOutputCompressQuality(100) // 결과물 압축률 : 원본 유지
-                    .setGuidelines(CropImageView.Guidelines.ON) // 가이드라인 : true
-                    .getIntent(baseContext)
-
-                cropPhotoResultLauncher.launch(intent)
-            }
-        })
-
-        // 게시글 추가 완료시
-        addPostViewModel.isCompleteInsert.observe(this, EventObserver {
-            onBackPressedCallback.handleOnBackPressed()
-        })
-    }
-
-    override fun onCameraClick() {
-
-        // 안드로이드 10부터는 WRITE/READ 권한 요청 필요 없음
-        val permissions =
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            arrayOf(Manifest.permission.CAMERA)
-        } else {
-            arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-
-        PermissionManager.with(this@AddPostActivity, permissions).check { granted, denied, rejected ->
-            addPostViewModel.checkPermission(
-                permissions = permissions,
-                granted = granted
-            )
-        }
-    }
-    override fun onGalleryClick() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        intent.type = "image/*"
-        selectPhotoResultLauncher.launch(intent)
-    }
-
-    override fun onConfirmClick(dialogId: Int) {
-        when (dialogId) {
-            CONFIRM_DIALOG_CODE_DELETE_PHOTO -> {
-                addPostViewModel.deletePhoto()
-            }
-        }
-    }
-
-
-    // 사진을 촬영하거나 갤러리에서 선택 된 후 결과 도착
-    private val selectPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        addPostViewModel.checkSelectedPhoto(result)
-    }
-
-    // 사진 Crop 후 결과 도착
-    private val cropPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        addPostViewModel.checkCropppedPhoto(result)
     }
 }
