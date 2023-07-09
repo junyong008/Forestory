@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,9 +13,7 @@ import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.github.logansdk.permission.PermissionManager
@@ -24,58 +21,51 @@ import com.google.android.material.chip.Chip
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import com.yjy.forestory.R
+import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityAddPostBinding
 import com.yjy.forestory.util.*
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.muddz.styleabletoast.StyleableToast
 
 
 @AndroidEntryPoint
-class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, ConfirmDialogInterface {
+class AddPostActivity: BaseActivity<ActivityAddPostBinding>(R.layout.activity_add_post),
+    CameraGalleryDialogInterface, ConfirmDialogInterface {
 
-    private lateinit var binding: ActivityAddPostBinding
-    private val addPostViewModel: AddPostViewModel by viewModels()
 
-    private var mToast: StyleableToast? = null
-    private var loadingDialog: LoadingDialog? = null
-    private var tempCameraUri: Uri? = null
-
+    // Class 상수 및 변수 선언
     companion object {
         private const val CONFIRM_DIALOG_CODE_DELETE_PHOTO = 0
     }
 
-    // 시스템의 뒤로가기 버튼 눌렀을 때
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+    private val addPostViewModel: AddPostViewModel by viewModels()
+    private var loadingDialog: LoadingDialog? = null
+    private var tempCameraUri: Uri? = null
+
+
+    // 바인딩 뷰모델 설정
+    override fun initViewModel() {
+        binding.addPostViewModel = addPostViewModel
+    }
+
+
+    // 뒤로가기 커스텀
+    override val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             finish()
             overridePendingTransition(R.anim.stay, R.anim.slide_out_down)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_add_post)
 
-        binding.addPostViewModel = addPostViewModel
-        binding.lifecycleOwner = this@AddPostActivity
+    // 리스너 초기화
+    override fun setListener() {
 
-        // 뒤로가기 버튼 콜백 등록
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-        setOnClickListener()
-        setOnTextChanged()
-        setObserver()
-        setEventObserver()
-    }
-
-
-    private fun setOnClickListener() {
-        // 닫기버튼 클릭
+        // 닫기버튼 클릭 리스너
         binding.ibuttonClose.setOnClickListener {
             onBackPressedCallback.handleOnBackPressed()
         }
 
-        // 사진 추가 버튼 클릭
+        // 사진 추가 버튼 클릭 리스너
         binding.ibuttonAddPhoto.setOnClickListener {
 
             // 기존 사진이 존재한다면 삭제할건지 다이얼로그 제공 아니라면 카메라 or 갤러리 선택 다이얼로그 제공
@@ -86,7 +76,7 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
             }
         }
 
-        // 게시글 작성 버튼 클릭
+        // 게시글 작성 버튼 클릭 리스너
         binding.buttonAddpost.setOnClickListener {
             val uploadImage = ImageUtils.copyImageToInternalStorage(this, addPostViewModel.currentPhoto.value!!)
             val uploadContent = addPostViewModel.contentText.value
@@ -96,8 +86,34 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
                 addPostViewModel.addPost(uploadImage, uploadContent, uploadTags)
             }
         }
+
+        // 태그 edit 텍스트 변경 감지 리스너
+        binding.editTag.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
+                if (text.isNotEmpty() && (text.endsWith(" ") || text.endsWith("\n"))) {
+                    val inputText = text.removeSuffix("\n").trim()
+
+                    binding.editTag.setText("")
+
+                    addPostViewModel.tagList.value?.let { tagList ->
+                        if (tagList.size >= addPostViewModel.maxTagCount) {
+                            showToast(getString(R.string.max_tag_count_info, addPostViewModel.maxTagCount), R.style.errorToast)
+                            return
+                        }
+                    }
+
+                    if (inputText.isNotEmpty()) {
+                        addPostViewModel.addTag(inputText.toString())
+                    }
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
+
+    // 그 외 함수 및 CallBack
     override fun onConfirmClick(dialogId: Int) {
         when (dialogId) {
             CONFIRM_DIALOG_CODE_DELETE_PHOTO -> {
@@ -126,8 +142,7 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
                     selectPhotoResultLauncher.launch(intent)
                 }
             } else {
-                mToast?.cancel()
-                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.camera_permission_denied), R.style.errorToast).also { it.show() }
+                showToast(getString(R.string.camera_permission_denied), R.style.errorToast)
             }
         }
     }
@@ -172,34 +187,9 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
         }
     }
 
-    private fun setOnTextChanged() {
-        // 태그 edit 텍스트 변경 감지
-        binding.editTag.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
-                if (text.isNotEmpty() && (text.endsWith(" ") || text.endsWith("\n"))) {
-                    val inputText = text.removeSuffix("\n").trim()
 
-                    binding.editTag.setText("")
-
-                    addPostViewModel.tagList.value?.let { tagList ->
-                        if (tagList.size >= addPostViewModel.maxTagCount) {
-                            mToast?.cancel()
-                            mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.max_tag_count_info, addPostViewModel.maxTagCount), R.style.errorToast).also { it.show() }
-                            return
-                        }
-                    }
-
-                    if (inputText.isNotEmpty()) {
-                        addPostViewModel.addTag(inputText.toString())
-                    }
-                }
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun afterTextChanged(s: Editable?) {}
-        })
-    }
-
-    private fun setObserver() {
+    // Observer 설정
+    override fun setObserver() {
 
         // BindingAdapter를 이용해 바인딩 하지 않은 이유 : 추후 재사용이 불가능한 바인딩 형태라 판단하여 BindingAdapter의 부담을 덜기 위함.
         addPostViewModel.currentPhoto.observe(this, Observer { inputUri ->
@@ -241,20 +231,20 @@ class AddPostActivity : AppCompatActivity(), CameraGalleryDialogInterface, Confi
                 }
             }
         })
-
     }
 
-    private fun setEventObserver() {
+
+    // EventObserver 설정
+    override fun setEventObserver() {
 
         // 게시글 추가 작업 완료 이벤트
         addPostViewModel.isCompleteInsert.observe(this, EventObserver { result ->
 
-            mToast?.cancel()
             if (result) {
-                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.post_added), R.style.successToast).also { it.show() }
+                showToast(getString(R.string.post_added), R.style.successToast)
                 onBackPressedCallback.handleOnBackPressed()
             } else {
-                mToast = StyleableToast.makeText(this@AddPostActivity, getString(R.string.post_upload_failed), R.style.errorToast).also { it.show() }
+                showToast(getString(R.string.post_upload_failed), R.style.errorToast)
             }
         })
     }

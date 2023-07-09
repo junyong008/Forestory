@@ -5,14 +5,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -20,50 +16,36 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
+import com.yjy.forestory.base.BaseFragment
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.muddz.styleabletoast.StyleableToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LinearPostListFragment : Fragment() {
+class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layout.fragment_linear_post_list) {
 
-    // 바인딩, 뷰모델 정의
-    private lateinit var binding: FragmentLinearPostListBinding
     @Inject lateinit var postViewModel: PostViewModel
 
-    private var mToast: StyleableToast? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        super.onCreateView(inflater, container, savedInstanceState)
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_linear_post_list, container, false)
-
-        binding.lifecycleOwner = this@LinearPostListFragment
+    override fun initViewModel() {
         binding.postViewModel = postViewModel
-
-        setRecyclerViewAdapter()
-        setOnClickListener()
-        setObserver()
-        setEventObserver()
-
-        return binding.root
     }
 
-
-    private fun setRecyclerViewAdapter() {
+    override fun initView(savedInstanceState: Bundle?) {
         /* 리사이클러뷰 Adapter 등록, postItemClickListener 리스너를 등록하여 클릭 이벤트 처리
         왜 DialogFragment는 직접 인터페이스 리스너를 상속받아 override 했는가 하면.. -> 이건 Configuration Change가 발생하더라도 다시 onCreateView에서 어댑터를 연결하면서 리스너가 등록된다.
         DialogFragment는 onCreate에서 할당하는게 아니기에, 띄워져 있는 상태에서 CC 가 발생하면 리스너 등록이 안된다.*/
-        val recyclerViewAdapter = PostAdapter(postItemClickListener, true)
-        binding.recyclerViewPosts.adapter = recyclerViewAdapter
+        binding.recyclerViewPosts.adapter = PostAdapter(postItemClickListener, true)
+    }
+
+    override fun setListener() {
 
         // 리사이클러뷰 Adapter의 로딩 상태를 감지하여 프로그레스 보여주기
-        recyclerViewAdapter.addLoadStateListener { loadState ->
+        (binding.recyclerViewPosts.adapter as PostAdapter).addLoadStateListener { loadState ->
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
 
@@ -103,16 +85,15 @@ class LinearPostListFragment : Fragment() {
                 }
             }
         })
-    }
 
-    private fun setOnClickListener() {
         // 게시글 맨 위로 가기 버튼
         binding.ibuttonGoTop.setOnClickListener {
             binding.recyclerViewPosts.scrollToPosition(0)
         }
     }
 
-    private fun setObserver() {
+    override fun setObserver() {
+
         // 게시글이 존재하지 않으면 안내 메시지를 띄운다
         postViewModel.postCount.observe(viewLifecycleOwner, Observer {
             binding.imageViewInfo.isVisible = (it <= 0)
@@ -120,35 +101,37 @@ class LinearPostListFragment : Fragment() {
         })
     }
 
-    private fun setEventObserver() {
+    override fun setEventObserver() {
 
         // 댓글 추가 결과 처리
         postViewModel.isCompleteGetComments.observe(viewLifecycleOwner, EventObserver { responseCode ->
             if (responseCode != 200) {
-                mToast?.cancel()
-                mToast = StyleableToast.makeText(requireContext(), getString(R.string.add_comment_failure, responseCode), R.style.errorToast).also { it.show() }
+                showToast(getString(R.string.add_comment_failure, responseCode), R.style.errorToast)
             }
         })
 
         // 게시글 삭제 결과 처리
         postViewModel.isCompleteDeletePost.observe(viewLifecycleOwner, EventObserver { result ->
-            mToast?.cancel()
-            val toastMessage = when (result) {
-                is PostViewModel.DeletePostResult.CannotDelete -> getString(R.string.notify_forest_friends)
-                is PostViewModel.DeletePostResult.Success -> getString(R.string.delete_success)
-                else -> getString(R.string.delete_failure)
+            when (result) {
+                is PostViewModel.DeletePostResult.CannotDelete -> {
+                    showToast(getString(R.string.notify_post_being_shared), R.style.errorToast)
+                }
+                is PostViewModel.DeletePostResult.Success -> {
+                    showToast(getString(R.string.delete_success), R.style.successToast)
+                }
+                else -> {
+                    showToast(getString(R.string.delete_failure), R.style.errorToast)
+                }
             }
-            mToast = StyleableToast.makeText(requireContext(), toastMessage, R.style.errorToast).also { it.show() }
         })
 
-        // 스크롤 맨 위로 이동
+        // 게시글이 새로 추가되면 스크롤을 맨 위로 이동
         postViewModel.isPostAdded.observe(viewLifecycleOwner, EventObserver {
             lifecycleScope.launch {
                 delay(100) // DB의 변경이 리사이클러뷰에 반영되는 시간을 고려하여 약간의 딜레이를 부여
                 binding.recyclerViewPosts.smoothScrollToPosition(0)
             }
         })
-
     }
 
     private val postItemClickListener = object : PostItemClickListener {

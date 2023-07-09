@@ -7,38 +7,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yjy.forestory.R
+import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityPostBinding
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
-import com.yjy.forestory.util.BindingAdapter.setCommentAddButtonState
-import com.yjy.forestory.util.BindingAdapter.setCommentItems
-import com.yjy.forestory.util.BindingAdapter.setFormattedDateTime
-import com.yjy.forestory.util.BindingAdapter.setImageUri
 import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.muddz.styleabletoast.StyleableToast
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostActivity : AppCompatActivity() {
+class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post) {
 
-    private lateinit var binding: ActivityPostBinding
     @Inject lateinit var postViewModel: PostViewModel
-
     private var postId: Int = -1
     private var isRecursion: Boolean = false
-    private var mToast: StyleableToast? = null
 
-    // 시스템의 뒤로가기 버튼 눌렀을 때
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+    override val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             // 이미지뷰가 시야에 보이면 축소 애니메이션 적용, 아니라면 fade out 시킨다
             val scrollBounds = Rect()
@@ -55,15 +45,7 @@ class PostActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_post)
-
-        binding.postViewModel = postViewModel
-        binding.lifecycleOwner = this@PostActivity
-
-        // 뒤로가기 버튼 콜백 등록
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    override fun initView(savedInstanceState: Bundle?) {
 
         // 이미지가 그려진 후 애니메이션을 적용
         postponeEnterTransition()
@@ -79,20 +61,17 @@ class PostActivity : AppCompatActivity() {
 
         // 재귀 인지 확인. 검색 -> 태그 클릭 -> 검색 -> 태그 클릭 ... 재귀를 방지하기 위함
         isRecursion = intent.getBooleanExtra("recursion", false)
-
-        setOnClickListener()
-        setObserver()
-        setEventObserver()
     }
 
-    private fun setOnClickListener() {
+    override fun setListener() {
+
         // 뒤로가기 버튼 클릭
         binding.ibuttonClose.setOnClickListener {
             onBackPressedCallback.handleOnBackPressed()
         }
     }
 
-    private fun setObserver() {
+    override fun setObserver() {
 
         // 특정 게시글 정보를 받아와서 뷰를 업데이트 한다
         postViewModel.getPostWithTagsAndComments(postId).observe(this) { postWithTagsAndComments ->
@@ -105,18 +84,11 @@ class PostActivity : AppCompatActivity() {
             }
 
             // 바인딩
-            setImageUri(binding.circleImageViewUserPicture, postWithTagsAndComments.post.userPicture)
-            binding.textViewUserName.text = postWithTagsAndComments.post.userName
-            setFormattedDateTime(binding.textViewCreateDate, postWithTagsAndComments.post.createDate)
-            setImageUri(binding.imageViewPost, postWithTagsAndComments.post.image)
-            binding.textViewContent.text = postWithTagsAndComments.post.content
-            setCommentItems(binding.recyclerViewComments, postWithTagsAndComments.comments)
-            setCommentAddButtonState(binding.buttonAddComment, postWithTagsAndComments)
+            binding.postWithTagsAndComments = postWithTagsAndComments
             binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
 
             val chipGroup = binding.chipgroupTags
             val chipTexts = postWithTagsAndComments.tags
-            
             chipGroup.removeAllViews()
             for (chipText in chipTexts) {
 
@@ -159,28 +131,30 @@ class PostActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 
-    private fun setEventObserver() {
+    override fun setEventObserver() {
 
         // 댓글 추가 결과 처리
         postViewModel.isCompleteGetComments.observe(this, EventObserver { responseCode ->
             if (responseCode != 200) {
-                mToast?.cancel()
-                mToast = StyleableToast.makeText(this, getString(R.string.add_comment_failure, responseCode), R.style.errorToast).also { it.show() }
+                showToast(getString(R.string.add_comment_failure, responseCode), R.style.errorToast)
             }
         })
 
         // 게시글 삭제 결과 처리
         postViewModel.isCompleteDeletePost.observe(this, EventObserver { result ->
-            mToast?.cancel()
-            val toastMessage = when (result) {
-                is PostViewModel.DeletePostResult.CannotDelete -> getString(R.string.notify_forest_friends)
-                is PostViewModel.DeletePostResult.Success -> getString(R.string.delete_success)
-                else -> getString(R.string.delete_failure)
+            when (result) {
+                is PostViewModel.DeletePostResult.CannotDelete -> {
+                    showToast(getString(R.string.notify_post_being_shared), R.style.errorToast)
+                }
+                is PostViewModel.DeletePostResult.Success -> {
+                    showToast(getString(R.string.delete_success), R.style.successToast)
+                }
+                else -> {
+                    showToast(getString(R.string.delete_failure), R.style.errorToast)
+                }
             }
-            mToast = StyleableToast.makeText(this, toastMessage, R.style.errorToast).also { it.show() }
         })
     }
 

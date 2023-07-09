@@ -86,22 +86,24 @@ object BindingAdapter {
     // LinearPostList와 PostActivity에서 겹쳐서 바인딩 어댑터로 묶음. 댓글 추가버튼의 상태를 게시글과 댓글 상태에 따라서 변경
     @BindingAdapter("commentAddButtonState")
     @JvmStatic
-    fun setCommentAddButtonState(button: AppCompatButton, postWithTagsAndComments: PostWithTagsAndComments){
+    fun setCommentAddButtonState(button: AppCompatButton, postWithTagsAndComments: PostWithTagsAndComments?){
 
-        // 댓글이 있다면 댓글 추가 버튼 숨기기
-        if (postWithTagsAndComments.comments.isNotEmpty()) {
-            button.visibility = View.GONE
-        } else {
-            button.visibility = View.VISIBLE
-        }
+        postWithTagsAndComments?.let {
+            // 댓글이 있다면 댓글 추가 버튼 숨기기
+            if (it.comments.isNotEmpty()) {
+                button.visibility = View.GONE
+            } else {
+                button.visibility = View.VISIBLE
+            }
 
-        // 댓글이 없고 만약 추가중이라면 버튼 비활성화
-        if (postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments) {
-            button.text = ""
-            button.isEnabled = false
-        } else {
-            button.text = button.context.getString(R.string.notify_forest_friends)
-            button.isEnabled = true
+            // 댓글이 없고 만약 추가중이라면 버튼 비활성화
+            if (it.comments.isEmpty() && it.post.isAddingComments) {
+                button.text = ""
+                button.isEnabled = false
+            } else {
+                button.text = button.context.getString(R.string.notify_forest_friends)
+                button.isEnabled = true
+            }
         }
     }
 
@@ -119,10 +121,12 @@ object BindingAdapter {
     // imageView의 이미지를 resourceId로 바인딩
     @BindingAdapter("imageResource")
     @JvmStatic
-    fun setImageResource(imageView: ImageView, resourceId: Int) {
-        Glide.with(imageView.context)
-            .load(resourceId)
-            .into(imageView)
+    fun setImageResource(imageView: ImageView, resourceId: Int?) {
+        resourceId?.let {
+            Glide.with(imageView.context)
+                .load(it)
+                .into(imageView)
+        }
     }
 
     // textView의 텍스트를 Date로 바인딩

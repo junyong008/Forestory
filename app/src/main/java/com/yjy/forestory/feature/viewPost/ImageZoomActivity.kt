@@ -3,18 +3,13 @@ package com.yjy.forestory.feature.viewPost
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import com.yjy.forestory.R
+import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityImageZoomBinding
 
-class ImageZoomActivity : AppCompatActivity() {
+class ImageZoomActivity: BaseActivity<ActivityImageZoomBinding>(R.layout.activity_image_zoom) {
 
-    private lateinit var binding: ActivityImageZoomBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_image_zoom)
+    override fun initView(savedInstanceState: Bundle?) {
 
         // Uri를 받아서 photoView에 띄우기
         intent.getStringExtra("imageUri")?.let {

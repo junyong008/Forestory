@@ -10,13 +10,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.paging.LoadState
 import com.yjy.forestory.R
+import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivitySearchBinding
 import com.yjy.forestory.feature.viewPost.PostActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
@@ -24,69 +23,34 @@ import com.yjy.forestory.model.Tag
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SearchActivity : AppCompatActivity() {
+class SearchActivity: BaseActivity<ActivitySearchBinding>(R.layout.activity_search) {
 
-    private lateinit var binding: ActivitySearchBinding
     private val searchViewModel: SearchViewModel by viewModels()
 
-    private var searchTag: String? = null
+    override fun initViewModel() {
+        binding.searchViewModel = searchViewModel
+    }
 
-    // 시스템의 뒤로가기 버튼 눌렀을 때
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+    override val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             finish()
             overridePendingTransition(R.anim.stay, R.anim.slide_out_right)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_search)
+    override fun initView(savedInstanceState: Bundle?) {
 
-        binding.searchViewModel = searchViewModel
-        binding.lifecycleOwner = this@SearchActivity
-
-        // 뒤로가기 버튼 콜백 등록
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-        // 태그 클릭으로 인한 유입
-        searchTag = intent.getStringExtra("tag")
-
-        setSearchEdit()
-        setRecyclerViewAdapter()
-        setOnClickListener()
-        setOnTextChanged()
-        setObserver()
-    }
-
-    private fun setSearchEdit() {
-
-        // 태그 클릭으로 인한 유입이라면 바로 태그를 검색해서 보여주고, 아니라면 포커스를 잡아 키보드를 띄운다
-        if (searchTag != null) {
-            searchViewModel.searchPostsByTag(searchTag!!)
-        } else {
-            binding.editSearch.requestFocus()
-        }
-
-        // 엔터를 누르면 검색하기
-        binding.editSearch.setOnEditorActionListener { view, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-
-                searchViewModel.searchPosts(searchViewModel.searchText.value) // 검색. 검색 결과는 바로 리사이클러뷰에 바인딩어댑터로 바인딩된다
-                hideKeyboard() // 키보드 숨기기
-                true
+        // 태그 클릭으로 인한 유입이라면 바로 태그를 검색해서 보여주고, 아니라면 포커스를 잡아 키보드를 띄운다 : 최초 액티비티 실행시
+        if (savedInstanceState == null) {
+            val searchTag = intent.getStringExtra("tag")
+            if (searchTag != null) {
+                searchViewModel.searchPostsByTag(searchTag)
             } else {
-                false
+                binding.editSearch.requestFocus()
             }
         }
 
-        // 포커스가 잡히면 현재 검색한 태그를 비우기 : 태그 클릭으로 인한 유입시 setOnClickListener가 두번째 클릭부터 동작함. 그래서 이걸로 보충
-        binding.editSearch.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) { searchViewModel.emptyKeytag() }
-        }
-    }
-
-    private fun setRecyclerViewAdapter() {
+        // 리사이클러뷰 초기화
         val tagRecyclerViewAdapter = SearchTagAdapter(searchTagItemClickListener)
         binding.recyclerViewTags.adapter = tagRecyclerViewAdapter
 
@@ -98,24 +62,21 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun setOnClickListener() {
-        // 닫기버튼 클릭
-        binding.ibuttonClose.setOnClickListener {
-            onBackPressedCallback.handleOnBackPressed()
+    override fun setListener() {
+
+        // 검색 Edit 엔터를 누르면 게시글의 내용 검색
+        binding.editSearch.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+
+                searchViewModel.searchPosts(searchViewModel.searchText.value) // 검색. 검색 결과는 바로 리사이클러뷰에 바인딩어댑터로 바인딩된다
+                hideKeyboard() // 키보드 숨기기
+                true
+            } else {
+                false
+            }
         }
 
-        // Chip 닫기 버튼 or 검색창을 누르면 현재 검색한 태그를 비워서 검색이 가능하도록 설정
-        binding.chipTag.setOnCloseIconClickListener {
-            searchViewModel.emptyKeytag()
-        }
-        binding.editSearch.setOnClickListener {
-            searchViewModel.emptyKeytag()
-        }
-    }
-
-    private fun setOnTextChanged() {
-
-        // 검색창이 #으로 시작하면 태그 검색
+        // 검색 Edit # 으로 시작 하면 게시글의 태그 검색
         binding.editSearch.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
                 if (text.startsWith("#") && searchViewModel.currentKeytag.value.isNullOrEmpty()) {
@@ -128,9 +89,25 @@ class SearchActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        // 검색 Edit에 포커스가 잡히거나, 클릭되거나, 혹은 Chip의 닫기버튼을 직접 누르면 현재 검색한 태그를 비우기
+        binding.editSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) { searchViewModel.emptyKeytag() }
+        }
+        binding.editSearch.setOnClickListener {
+            searchViewModel.emptyKeytag()
+        }
+        binding.chipTag.setOnCloseIconClickListener {
+            searchViewModel.emptyKeytag()
+        }
+
+        // 액티비티 닫기버튼 클릭
+        binding.ibuttonClose.setOnClickListener {
+            onBackPressedCallback.handleOnBackPressed()
+        }
     }
 
-    private fun setObserver() {
+    override fun setObserver() {
         // 검색어가 있으면 한번에 지우기 버튼을 제공한다
         searchViewModel.searchText.observe(this, Observer {
             binding.ibuttonDeleteText.isVisible = it.isNotEmpty()

@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".BaseApplication"
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -32,6 +32,9 @@
             android:name=".feature.viewPost.ImageZoomActivity"
             android:exported="false"
             android:theme="@style/Theme.Forestory" /> <!-- Crop Activity는 ActionBar가 필요하므로 별도의 Theme 정의 -->
+        <activity
+            android:name=".feature.setting.ThemeSettingActivity"
+            android:exported="false" />
         <activity
             android:name=".feature.searchPost.SearchActivity"
             android:exported="false" />
