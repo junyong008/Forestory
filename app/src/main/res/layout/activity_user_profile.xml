@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="userProfileViewModel"
+            type="com.yjy.forestory.feature.setting.UserProfileViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:text="@string/edit_profile"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/view"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ibutton_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ripple_effect"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_close" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="60dp"
+            android:background="@color/gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="40dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.494"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            app:layout_constraintVertical_bias="0.3">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/circleImageView_userPicture"
+                    imageUri="@{userProfileViewModel.currentUserPicture}"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/ic_user"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/circleImageView_addPhoto"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_camera_gray"
+                    app:civ_border_color="@color/white"
+                    app:civ_border_width="2dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/circleImageView_userPicture"
+                    app:layout_constraintEnd_toEndOf="@+id/circleImageView_userPicture" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup_gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="0.5dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                android:layout_gravity="center">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_male"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:chipStrokeWidth="2dp"
+                    app:chipStrokeColor="@color/selector_male_stroke"
+                    app:chipBackgroundColor="@color/selector_male"
+                    android:textColor="@color/black"
+                    android:text="@string/male" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_female"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:chipStrokeWidth="2dp"
+                    app:chipStrokeColor="@color/selector_female_stroke"
+                    app:chipBackgroundColor="@color/selector_female"
+                    android:textColor="@color/black"
+                    android:text="@string/female" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edit_nickname"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="10dp"
+                android:fontFamily="@font/kjcgothic_bold"
+                android:gravity="center"
+                android:hint="@string/enter_name_hint"
+                android:inputType="textPersonName"
+                android:maxLength="10"
+                android:text="@={userProfileViewModel.currentUserName}"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:autofillHints="no" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginBottom="10dp"
+                android:enabled="@{userProfileViewModel.isReadyToConfirm}"
+                android:background="@drawable/button_green_round"
+                android:elevation="9dp"
+                android:fontFamily="@font/kjcgothic_bold"
+                android:text="@string/confirm"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

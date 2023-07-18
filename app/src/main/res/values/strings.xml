@@ -28,4 +28,28 @@
     <string name="delete_failure">Failed to delete.</string>
     <string name="delete">Delete</string>
     <string name="confirm_delete_message">Are you sure you want to delete the post?</string>
+    <string name="setting_theme">Theme settings</string>
+    <string name="setting_language">Language</string>
+    <string name="system_settings">System Settings</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="language_kor" translatable="false">한국어</string>
+    <string name="language_eng" translatable="false">English</string>
+    <string name="noti_channel_name">Comment Notification</string>
+    <string name="noti_channel_description">Notification of arrival of comments from forest friends</string>
+    <string name="noti_title_new_comment">A comment has been added</string>
+    <string name="noti_content_new_comment">You have received a comment from the Forest Friends.</string>
+    <string name="notification_permission_denied">Notification permission has been denied.</string>
+    <string name="press_twice_to_exit">Press the button again to exit.</string>
+    <string name="delivering_news_to_forest_friends">Delivering news to the forest friends</string>
+    <string name="delivering_news_message">Has gone to deliver news to the friends in the forest</string>
+    <string name="setting_notification">Comment Notifications</string>
+    <string name="require_notification_permission">Notification permission has been denied\nPlease allow notification permission in settings.</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="enter_name_hint">Enter Name</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="profile_settings_completed">Profile settings saved</string>
+    <string name="app_description">My Own SNS with Animal AI Friends</string>
+    <string name="start">START</string>
 </resources>

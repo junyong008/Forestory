@@ -32,4 +32,10 @@ object AppModule {
     fun provideUserRepository(@ApplicationContext context: Context): UserRepository {
         return UserRepositoryImpl(context)
     }
+
+    @Singleton
+    @Provides
+    fun provideSettingRepository(@ApplicationContext context: Context): SettingRepository {
+        return SettingRepositoryImpl(context)
+    }
 }

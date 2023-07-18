@@ -29,4 +29,26 @@
     <string name="delete_failure">삭제 실패</string>
     <string name="delete">삭제하기</string>
     <string name="confirm_delete_message">게시글을 삭제하시겠습니까?</string>
+    <string name="setting_theme">테마 설정</string>
+    <string name="setting_language">언어 설정</string>
+    <string name="system_settings">시스템 설정</string>
+    <string name="light_mode">라이트 모드</string>
+    <string name="dark_mode">다크 모드</string>
+    <string name="noti_channel_name">댓글 알림</string>
+    <string name="noti_channel_description">숲속 친구들로 부터 댓글 도착시 알림</string>
+    <string name="noti_title_new_comment">댓글이 추가되었습니다</string>
+    <string name="noti_content_new_comment">숲속 친구들로부터 댓글이 도착했습니다.</string>
+    <string name="notification_permission_denied">알림 권한이 거부되었습니다.</string>
+    <string name="press_twice_to_exit">버튼을 한번 더 누르시면 종료됩니다.</string>
+    <string name="delivering_news_to_forest_friends">숲속 친구들에게 소식을 전하는 중</string>
+    <string name="delivering_news_message">숲속 친구들에게 소식을 전하러 떠났습니다</string>
+    <string name="setting_notification">댓글 알림</string>
+    <string name="require_notification_permission">알림 권한이 차단되었습니다\n설정에서 알림 권한을 허용해주세요.</string>
+    <string name="edit_profile">프로필 설정</string>
+    <string name="enter_name_hint">이름을 입력해주세요</string>
+    <string name="male">남성</string>
+    <string name="female">여성</string>
+    <string name="profile_settings_completed">프로필 설정이 저장되었습니다</string>
+    <string name="app_description">숲속 AI 동물 친구들과 함께하는 나만의 SNS</string>
+    <string name="start">시작하기</string>
 </resources>
