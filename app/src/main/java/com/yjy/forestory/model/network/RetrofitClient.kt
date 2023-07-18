@@ -1,6 +1,6 @@
 package com.yjy.forestory.model.network
 
-import com.yjy.forestory.Const.Companion.BASE_URL
+import com.yjy.forestory.Const.BASE_URL
 import com.yjy.forestory.model.network.api.CommentApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

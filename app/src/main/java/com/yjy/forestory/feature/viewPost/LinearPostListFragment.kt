@@ -3,7 +3,9 @@ package com.yjy.forestory.feature.viewPost
 import EventObserver
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -14,25 +16,39 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseFragment
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
+import com.yjy.forestory.feature.main.RecyclerViewScrollListener
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
-import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
 class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layout.fragment_linear_post_list) {
 
     @Inject lateinit var postViewModel: PostViewModel
+    private var recyclerViewScrollListener: RecyclerViewScrollListener? = null
 
     override fun initViewModel() {
         binding.postViewModel = postViewModel
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is RecyclerViewScrollListener) {
+            recyclerViewScrollListener = context
+        }
     }
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -83,6 +99,9 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
                             .start()
                     }
                 }
+
+                // 액티비티의 리스너에 스크롤 변경 정보를 넘김
+                recyclerViewScrollListener?.onScrollChanged(recyclerView.computeVerticalScrollOffset())
             }
         })
 
@@ -103,13 +122,6 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
 
     override fun setEventObserver() {
 
-        // 댓글 추가 결과 처리
-        postViewModel.isCompleteGetComments.observe(viewLifecycleOwner, EventObserver { responseCode ->
-            if (responseCode != 200) {
-                showToast(getString(R.string.add_comment_failure, responseCode), R.style.errorToast)
-            }
-        })
-
         // 게시글 삭제 결과 처리
         postViewModel.isCompleteDeletePost.observe(viewLifecycleOwner, EventObserver { result ->
             when (result) {
@@ -117,6 +129,10 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
                     showToast(getString(R.string.notify_post_being_shared), R.style.errorToast)
                 }
                 is PostViewModel.DeletePostResult.Success -> {
+                    // 삭제 성공시 내부 저장소에 저장된 게시글 이미지를 삭제하여 내부 공간 절약
+                    val deletedPostImage: Uri = postViewModel.deletedPostImage.value!!
+                    requireContext().contentResolver.delete(deletedPostImage, null, null)
+
                     showToast(getString(R.string.delete_success), R.style.successToast)
                 }
                 else -> {
@@ -137,12 +153,23 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
     private val postItemClickListener = object : PostItemClickListener {
         // 댓글 추가 버튼 클릭 리스너 재정의
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+
+            // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
             val post = postWithTagsAndComments.post
             val parentPostId = post.postId
             val postContent = post.content
-            ImageUtils.uriToMultipart(requireContext(), post.image)?.let {  postImage ->
-                postViewModel.getComments(parentPostId, postContent, postImage)
-            }
+            val postImage = post.image.toString()
+
+            val inputData = workDataOf(
+                CommentWorker.PARENT_POST_ID_KEY to parentPostId,
+                CommentWorker.POST_CONTENT_KEY to postContent,
+                CommentWorker.POST_IMAGE_KEY to postImage
+            )
+
+            val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
+            WorkManager.getInstance(requireContext()).enqueue(commentWorkRequest)
+
+            Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
         }
 
         // 이미지 클릭 리스너 재정의

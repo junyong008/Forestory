@@ -1,6 +1,7 @@
 package com.yjy.forestory.feature.viewPost
 
 import EventObserver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
@@ -10,9 +11,11 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.RecyclerView
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseFragment
 import com.yjy.forestory.databinding.FragmentGridPostListBinding
+import com.yjy.forestory.feature.main.RecyclerViewScrollListener
 import com.yjy.forestory.model.PostWithTagsAndComments
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -23,9 +26,18 @@ import javax.inject.Inject
 class GridPostListFragment: BaseFragment<FragmentGridPostListBinding>(R.layout.fragment_grid_post_list) {
 
     @Inject lateinit var postViewModel: PostViewModel
+    private var recyclerViewScrollListener: RecyclerViewScrollListener? = null
 
     override fun initViewModel() {
         binding.postViewModel = postViewModel
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is RecyclerViewScrollListener) {
+            recyclerViewScrollListener = context
+        }
     }
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -37,6 +49,14 @@ class GridPostListFragment: BaseFragment<FragmentGridPostListBinding>(R.layout.f
         (binding.recyclerViewPosts.adapter as PostAdapter).addLoadStateListener { loadState ->
             binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
         }
+
+        // 리사이클러뷰의 스크롤 변경 이벤트를 액티비티 리스너에 전달
+        binding.recyclerViewPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                recyclerViewScrollListener?.onScrollChanged(recyclerView.computeVerticalScrollOffset())
+            }
+        })
     }
 
 

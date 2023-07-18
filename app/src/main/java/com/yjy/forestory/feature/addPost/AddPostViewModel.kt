@@ -55,13 +55,14 @@ class AddPostViewModel @Inject constructor(
 
 
     // ---------------------------------- 게시글 추가
-    val isReadyToPost = MediatorLiveData(false)
+    private val _isReadyToPost = MediatorLiveData(false)
+    val isReadyToPost: MediatorLiveData<Boolean> get() = _isReadyToPost
 
     init {
         // _currentPhoto와 contentText가 변경될때마다 checkReadyToPost() 가 호출되어 isReadyToPost의 상태를 검증한다.
         // "isReadyToPost.value =" 로 갱신하지 않으면 addSource한 데이터의 Value가 저장된다.
-        isReadyToPost.addSource(_currentPhoto) { isReadyToPost.value = checkReadyToPost() }
-        isReadyToPost.addSource(contentText) { isReadyToPost.value = checkReadyToPost() }
+        _isReadyToPost.addSource(_currentPhoto) { _isReadyToPost.value = checkReadyToPost() }
+        _isReadyToPost.addSource(contentText) { _isReadyToPost.value = checkReadyToPost() }
     }
 
     private fun checkReadyToPost(): Boolean {

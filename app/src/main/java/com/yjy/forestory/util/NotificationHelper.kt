@@ -53,7 +53,7 @@ object NotificationHelper {
         val pendingIntent = stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_hashtag)
+            .setSmallIcon(R.drawable.ic_logo)
             .setContentTitle(context.getString(R.string.delivering_news_to_forest_friends))
             .setContentIntent(pendingIntent)
             .setProgress(0, 0, true)
@@ -83,7 +83,7 @@ object NotificationHelper {
         val pendingIntent = stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_IMMUTABLE)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_hashtag)
+            .setSmallIcon(R.drawable.ic_logo)
             .setContentTitle(context.getString(R.string.noti_title_new_comment))
             .setContentText(context.getString(R.string.noti_content_new_comment))
             .setPriority(NotificationCompat.PRIORITY_HIGH)

@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.map
 
 class UserRepositoryImpl(private val context: Context): UserRepository {
 
-    private val USER_NAME_KEY = stringPreferencesKey("user_name")
-    private val USER_PICTURE_KEY = stringPreferencesKey("user_picture")
+    private val KEY_USER_NAME = stringPreferencesKey("user_name")
+    private val KEY_USER_PICTURE = stringPreferencesKey("user_picture")
+    private val KEY_USER_GENDER = stringPreferencesKey("user_gender")
 
     // context를 입력받아 직접적으로 사용하진 않지만, 코드 가독성을 위해 Context.userDataStore를 클래스 내에 선언하고 바로 불러와 사용.
     private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
@@ -21,19 +22,19 @@ class UserRepositoryImpl(private val context: Context): UserRepository {
 
     override fun getUserName(): Flow<String?> {
         return dataStore.data.map { preferences ->
-            preferences[USER_NAME_KEY]
+            preferences[KEY_USER_NAME]
         }
     }
 
     override suspend fun setUserName(userName: String) {
         dataStore.edit { settings ->
-            settings[USER_NAME_KEY] = userName
+            settings[KEY_USER_NAME] = userName
         }
     }
 
     override fun getUserPicture(): Flow<Uri?> {
         return dataStore.data.map { preferences ->
-            val pictureUriString = preferences[USER_PICTURE_KEY]
+            val pictureUriString = preferences[KEY_USER_PICTURE]
             if (pictureUriString != null) {
                 Uri.parse(pictureUriString)
             } else {
@@ -45,7 +46,19 @@ class UserRepositoryImpl(private val context: Context): UserRepository {
     override suspend fun setUserPicture(uri: Uri) {
         val pictureUriString = uri.toString()
         dataStore.edit { settings ->
-            settings[USER_PICTURE_KEY] = pictureUriString
+            settings[KEY_USER_PICTURE] = pictureUriString
+        }
+    }
+
+    override fun getUserGender(): Flow<String?> {
+        return dataStore.data.map { preferences ->
+            preferences[KEY_USER_GENDER]
+        }
+    }
+
+    override suspend fun setUserGender(userGender: String) {
+        dataStore.edit { settings ->
+            settings[KEY_USER_GENDER] = userGender
         }
     }
 }
@@ -57,4 +70,6 @@ interface UserRepository {
     suspend fun setUserName(userName: String)
     fun getUserPicture(): Flow<Uri?>
     suspend fun setUserPicture(uri: Uri)
+    fun getUserGender(): Flow<String?>
+    suspend fun setUserGender(userGender: String)
 }

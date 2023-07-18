@@ -19,6 +19,7 @@ import com.yjy.forestory.Const.GENDER_MALE
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityUserProfileBinding
+import com.yjy.forestory.feature.main.MainActivity
 import com.yjy.forestory.util.CameraGalleryDialog
 import com.yjy.forestory.util.CameraGalleryDialogInterface
 import com.yjy.forestory.util.ImageUtils
@@ -38,8 +39,13 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
 
     override val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
+
             finish()
-            overridePendingTransition(R.anim.stay, R.anim.fade_out)
+            if (isFirstSet) {
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            } else {
+                overridePendingTransition(R.anim.stay, R.anim.fade_out)
+            }
         }
     }
 
@@ -179,8 +185,15 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
 
         // 프로필 수정을 완료했을때
         userProfileViewModel.isCompleteConfirmProfile.observe(this, EventObserver {
-            showToast(getString(R.string.profile_settings_completed), R.style.successToast)
-            onBackPressedCallback.handleOnBackPressed()
+            if (isFirstSet) {
+                val intent = Intent(this@UserProfileActivity, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+                overridePendingTransition(R.anim.fade_in, R.anim.stay)
+            } else {
+                showToast(getString(R.string.profile_settings_completed), R.style.successToast)
+                onBackPressedCallback.handleOnBackPressed()
+            }
         })
     }
 }
