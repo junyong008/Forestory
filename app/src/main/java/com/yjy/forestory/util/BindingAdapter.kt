@@ -118,17 +118,6 @@ object BindingAdapter {
         }
     }
 
-    // imageView의 이미지를 resourceId로 바인딩
-    @BindingAdapter("imageResource")
-    @JvmStatic
-    fun setImageResource(imageView: ImageView, resourceId: Int?) {
-        resourceId?.let {
-            Glide.with(imageView.context)
-                .load(it)
-                .into(imageView)
-        }
-    }
-
     // textView의 텍스트를 Date로 바인딩
     @BindingAdapter("formattedDateTime")
     @JvmStatic

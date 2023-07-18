@@ -8,11 +8,10 @@ import com.yjy.forestory.model.Comment
 data class CommentEntity(
     val postId: Int,
     val writerName: String,
-    val writerPicture: Int,
     val content: String
 ) {
     @PrimaryKey(autoGenerate = true)
     var commentId: Int? = null
 
-    fun toComment(): Comment = Comment(commentId!!, postId, writerName, writerPicture, content)
+    fun toComment(): Comment = Comment(commentId!!, postId, writerName, content)
 }

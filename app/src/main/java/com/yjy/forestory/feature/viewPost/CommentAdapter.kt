@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.yjy.forestory.R
 import com.yjy.forestory.databinding.ItemCommentBinding
 import com.yjy.forestory.model.Comment
 
@@ -13,6 +14,19 @@ class CommentAdapter() : ListAdapter<Comment, CommentAdapter.MyViewHolder>(diffU
     inner class MyViewHolder(private val binding: ItemCommentBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(comment: Comment) {
             binding.comment = comment
+
+            // 이름에 따라 이미지 지정
+            val resourceId = when (comment.writerName) {
+                "아지" -> R.drawable.ic_dog
+                "코코" -> R.drawable.ic_cat
+                "터미" -> R.drawable.ic_bear
+                "울프" -> R.drawable.ic_wolf
+                "미니" -> R.drawable.ic_fox
+                "콩이" -> R.drawable.ic_rabbit
+                "랑이" -> R.drawable.ic_tiger
+                else -> R.drawable.ic_panda
+            }
+            binding.circleImageViewWriterPicture.setImageResource(resourceId)
         }
     }
 

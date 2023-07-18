@@ -6,5 +6,5 @@ data class CommentDto(
     val name: String,
     val content: String
 ) {
-    fun toCommentEntity(postId: Int, writerPicture: Int): CommentEntity = CommentEntity(postId, name, writerPicture, content)
+    fun toCommentEntity(postId: Int): CommentEntity = CommentEntity(postId, name, content)
 }

@@ -3,6 +3,7 @@ package com.yjy.forestory.feature.viewPost
 import EventObserver
 import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,14 +11,17 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityPostBinding
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
-import com.yjy.forestory.util.ImageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -123,24 +127,27 @@ class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post) {
 
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
+                // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
                 val post = postWithTagsAndComments.post
                 val parentPostId = post.postId
                 val postContent = post.content
-                ImageUtils.uriToMultipart(this, post.image)?.let { postImage ->
-                    postViewModel.getComments(parentPostId, postContent, postImage)
-                }
+                val postImage = post.image.toString()
+
+                val inputData = workDataOf(
+                    CommentWorker.PARENT_POST_ID_KEY to parentPostId,
+                    CommentWorker.POST_CONTENT_KEY to postContent,
+                    CommentWorker.POST_IMAGE_KEY to postImage
+                )
+
+                val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
+                WorkManager.getInstance(this@PostActivity).enqueue(commentWorkRequest)
+
+                Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
             }
         }
     }
 
     override fun setEventObserver() {
-
-        // 댓글 추가 결과 처리
-        postViewModel.isCompleteGetComments.observe(this, EventObserver { responseCode ->
-            if (responseCode != 200) {
-                showToast(getString(R.string.add_comment_failure, responseCode), R.style.errorToast)
-            }
-        })
 
         // 게시글 삭제 결과 처리
         postViewModel.isCompleteDeletePost.observe(this, EventObserver { result ->
@@ -149,6 +156,10 @@ class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post) {
                     showToast(getString(R.string.notify_post_being_shared), R.style.errorToast)
                 }
                 is PostViewModel.DeletePostResult.Success -> {
+                    // 삭제 성공시 내부 저장소에 저장된 게시글 이미지를 삭제하여 내부 공간 절약
+                    val deletedPostImage: Uri = postViewModel.deletedPostImage.value!!
+                    baseContext.contentResolver.delete(deletedPostImage, null, null)
+
                     showToast(getString(R.string.delete_success), R.style.successToast)
                 }
                 else -> {

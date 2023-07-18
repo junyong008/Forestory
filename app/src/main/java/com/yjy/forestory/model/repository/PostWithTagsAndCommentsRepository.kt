@@ -6,7 +6,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.yjy.forestory.R
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.model.Tag
 import com.yjy.forestory.model.db.dao.PostWithTagsAndCommentsDao
@@ -70,19 +69,7 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
             }
 
             val commentEntityList: List<CommentEntity> = commentDtoList.map { commentDto ->
-                // 이름에 따라 아이콘 별도 적용
-                val resourceId = when (commentDto.name) {
-                    "아지" -> R.drawable.ic_dog
-                    "코코" -> R.drawable.ic_cat
-                    "터미" -> R.drawable.ic_bear
-                    "울프" -> R.drawable.ic_wolf
-                    "미니" -> R.drawable.ic_fox
-                    "콩이" -> R.drawable.ic_rabbit
-                    "랑이" -> R.drawable.ic_tiger
-                    else -> R.drawable.ic_panda
-                }
-
-                commentDto.toCommentEntity(parentPostId, resourceId)
+                commentDto.toCommentEntity(parentPostId)
             }
 
             postWithTagsAndCommentsDao.insertCommentList(commentEntityList)
