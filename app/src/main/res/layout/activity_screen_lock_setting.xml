@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:text="@string/setting_screen_lock"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/view"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/ibutton_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ripple_effect"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_close" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="60dp"
+            android:background="@color/gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginHorizontal="16dp"
+            android:background="@drawable/bg_lightgray_round"
+            android:fontFamily="@font/kjcgothic_bold"
+            android:minHeight="50dp"
+            android:padding="16dp"
+            android:text="@string/warning_password"
+            android:textColor="#E05151"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@+id/menu_bioPassword" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menu_password"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/view">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/appCompatImageView"
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:src="@drawable/ic_lock"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/kjcgothic_bold"
+                android:text="@string/password"
+                android:textColor="@color/lightblack"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/appCompatImageView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_password"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:thumb="@drawable/switch_thumb"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:track="@drawable/selector_switch_track" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_changePassword"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/menu_password">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:src="@drawable/ic_refresh" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/kjcgothic_bold"
+                android:text="@string/change_password"
+                android:textColor="@color/lightblack"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menu_bioPassword"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/menu_changePassword">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/appCompatImageView1"
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:src="@drawable/ic_fingerprint"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/kjcgothic_bold"
+                android:text="@string/biometric_authentication"
+                android:textColor="@color/lightblack"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/appCompatImageView1"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imageView_bioError"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="4dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_circle_error" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_bioPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:thumb="@drawable/switch_thumb"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:track="@drawable/selector_switch_track" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -12,9 +12,11 @@ import kotlinx.coroutines.flow.map
 
 class UserRepositoryImpl(private val context: Context): UserRepository {
 
-    private val KEY_USER_NAME = stringPreferencesKey("user_name")
-    private val KEY_USER_PICTURE = stringPreferencesKey("user_picture")
-    private val KEY_USER_GENDER = stringPreferencesKey("user_gender")
+    companion object {
+        private val KEY_USER_NAME = stringPreferencesKey("user_name")
+        private val KEY_USER_PICTURE = stringPreferencesKey("user_picture")
+        private val KEY_USER_GENDER = stringPreferencesKey("user_gender")
+    }
 
     // context를 입력받아 직접적으로 사용하진 않지만, 코드 가독성을 위해 Context.userDataStore를 클래스 내에 선언하고 바로 불러와 사용.
     private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")

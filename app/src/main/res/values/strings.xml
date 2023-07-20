@@ -52,4 +52,21 @@
     <string name="profile_settings_completed">Profile settings saved</string>
     <string name="app_description">My Own SNS with Animal AI Friends</string>
     <string name="start">START</string>
+    <string name="setting_screen_lock">Screen lock</string>
+    <string name="setting_backup">Backup/Restore</string>
+    <string name="setting_open_source">OpenSource license</string>
+    <string name="setting_privacy_policy">Privacy policy</string>
+    <string name="version">Version</string>
+    <string name="noti_title_failure">Failed to deliver the news</string>
+    <string name="noti_content_failure">Please try again later</string>
+    <string name="setting">require_notification_permission</string>
+    <string name="password">Password</string>
+    <string name="biometric_authentication">Biometric authentication</string>
+    <string name="enter_password">Please enter your password</string>
+    <string name="password_unmatch">Password doesn\'t match</string>
+    <string name="enter_password_one_more">Please enter your password\n one more time</string>
+    <string name="password_set_complete">Your password has been set</string>
+    <string name="change_password">Change Password</string>
+    <string name="enter_new_password">Please enter a new password</string>
+    <string name="warning_password">If you lose your password, you cannot recover it</string>
 </resources>

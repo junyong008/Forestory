@@ -9,9 +9,13 @@ import kotlinx.coroutines.flow.map
 
 class SettingRepositoryImpl(private val context: Context): SettingRepository {
 
-    private val KEY_THEME = intPreferencesKey("setting_theme")
-    private val KEY_LANGUAGE = stringPreferencesKey("setting_language")
-    private val KEY_NOTIFICATION = booleanPreferencesKey("setting_notification")
+    companion object {
+        private val KEY_THEME = intPreferencesKey("setting_theme")
+        private val KEY_LANGUAGE = stringPreferencesKey("setting_language")
+        private val KEY_NOTIFICATION = booleanPreferencesKey("setting_notification")
+        private val KEY_PASSWORD = stringPreferencesKey("setting_password")
+        private val KEY_BIO_PASSWORD = booleanPreferencesKey("setting_bio_password")
+    }
 
     private val Context.settingDataStore: DataStore<Preferences> by preferencesDataStore(name = "setting_preferences")
     private val dataStore = context.settingDataStore
@@ -49,6 +53,28 @@ class SettingRepositoryImpl(private val context: Context): SettingRepository {
             settings[KEY_NOTIFICATION] = isOn
         }
     }
+
+    override fun getPassword(): Flow<String?> {
+        return dataStore.data.map { preferences ->
+            preferences[KEY_PASSWORD]
+        }
+    }
+    override suspend fun setPassword(password: String) {
+        dataStore.edit { settings ->
+            settings[KEY_PASSWORD] = password
+        }
+    }
+
+    override fun getIsBioPassword(): Flow<Boolean?> {
+        return dataStore.data.map { preferences ->
+            preferences[KEY_BIO_PASSWORD]
+        }
+    }
+    override suspend fun setIsBioPassword(isOn: Boolean) {
+        dataStore.edit { settings ->
+            settings[KEY_BIO_PASSWORD] = isOn
+        }
+    }
 }
 
 interface SettingRepository {
@@ -58,4 +84,8 @@ interface SettingRepository {
     suspend fun setLanguage(language: String)
     fun getIsNotificationOn(): Flow<Boolean?>
     suspend fun setIsNotificationOn(isOn: Boolean)
+    fun getPassword(): Flow<String?>
+    suspend fun setPassword(password: String)
+    fun getIsBioPassword(): Flow<Boolean?>
+    suspend fun setIsBioPassword(isOn: Boolean)
 }

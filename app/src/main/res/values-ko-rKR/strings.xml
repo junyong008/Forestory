@@ -39,7 +39,7 @@
     <string name="noti_title_new_comment">댓글이 추가되었습니다</string>
     <string name="noti_content_new_comment">숲속 친구들로부터 댓글이 도착했습니다.</string>
     <string name="notification_permission_denied">알림 권한이 거부되었습니다.</string>
-    <string name="press_twice_to_exit">버튼을 한번 더 누르시면 종료됩니다.</string>
+    <string name="press_twice_to_exit">버튼을 한번 더 누르면 종료됩니다.</string>
     <string name="delivering_news_to_forest_friends">숲속 친구들에게 소식을 전하는 중</string>
     <string name="delivering_news_message">숲속 친구들에게 소식을 전하러 떠났습니다</string>
     <string name="setting_notification">댓글 알림</string>
@@ -51,4 +51,21 @@
     <string name="profile_settings_completed">프로필 설정이 저장되었습니다</string>
     <string name="app_description">숲속 AI 동물 친구들과 함께하는 나만의 SNS</string>
     <string name="start">시작하기</string>
+    <string name="setting_screen_lock">화면 잠금</string>
+    <string name="setting_backup">백업/복원</string>
+    <string name="setting_open_source">오픈소스 라이선스</string>
+    <string name="setting_privacy_policy">개인정보 처리방침</string>
+    <string name="version">버전</string>
+    <string name="noti_title_failure">소식을 전달하지 못했습니다</string>
+    <string name="noti_content_failure">잠시후 다시 시도해주세요</string>
+    <string name="setting">설정</string>
+    <string name="password">비밀번호</string>
+    <string name="biometric_authentication">생체 인증</string>
+    <string name="enter_password">비밀번호를 입력해주세요</string>
+    <string name="password_unmatch">비밀번호가 일치하지 않습니다</string>
+    <string name="enter_password_one_more">비밀번호를 한번 더 입력해주세요</string>
+    <string name="password_set_complete">비밀번호가 설정되었습니다</string>
+    <string name="change_password">비밀번호 변경</string>
+    <string name="enter_new_password">새로운 비밀번호를 입력해주세요</string>
+    <string name="warning_password">비밀번호 분실 시 복구가 불가능합니다</string>
 </resources>
