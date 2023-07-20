@@ -25,7 +25,7 @@ class PostViewModel @Inject constructor(
         postWithTagsAndCommentsRepository.getPostWithTagsAndComments(postId).asLiveData()
 
     // ---------------------------------- 게시글 갯수 조회 및 추가 감지
-    val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
+    private val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
     private var previousPostCount = -1
 
     private val _isPostAdded = MediatorLiveData<Event<Boolean>>()
@@ -34,7 +34,6 @@ class PostViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-
             // postCount 전체 개시글의 숫자에 변동이 생기면 이전 게시글의 갯수와 비교하여 게시글이 추가됐는지 감지
             _isPostAdded.addSource(postCount) { newCount ->
 

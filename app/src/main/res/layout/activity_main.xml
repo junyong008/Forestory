@@ -120,6 +120,50 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/view_Banner" />
 
+            <LinearLayout
+                android:id="@+id/linearLayout_noPost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/view_Banner"
+                app:layout_constraintVertical_bias="0.350">
+
+                <ImageView
+                    android:id="@+id/imageView_noPost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="150dp"
+                    app:srcCompat="@drawable/ic_park" />
+
+                <TextView
+                    android:id="@+id/textView_noPost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/kjcgothic_bold"
+                    android:gravity="center"
+                    android:text="@string/no_story_message"
+                    android:textColor="@color/gray"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_startPost"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/kjcgothic_bold"
+                    android:text="@string/start"
+                    android:textColor="@color/white"
+                    android:background="@drawable/button_green_circle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </LinearLayout>
+
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/ibutton_addPost"
                 android:layout_width="70dp"

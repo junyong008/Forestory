@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.SettingRepository
 import com.yjy.forestory.model.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,19 +16,17 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val settingRepository: SettingRepository
+    private val settingRepository: SettingRepository,
+    private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository
 ) : ViewModel() {
 
-    // 사용자 정보 조회 및 편집
+    // 사용자 정보 조회
     val userName: LiveData<String?> = userRepository.getUserName().asLiveData()
     val userPicture: LiveData<Uri?> = userRepository.getUserPicture().asLiveData()
 
-    suspend fun getIsUserProfileValid(): Boolean {
-        return ( userRepository.getUserName().firstOrNull() != null &&
-                userRepository.getUserPicture().firstOrNull() != null &&
-                userRepository.getUserGender().firstOrNull() != null)
-    }
 
+    // 게시글 갯수 조회
+    val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
 
 
     // 어플 실행시 설정값에 따른 UI 업데이트를 위한 설정값 접근 함수

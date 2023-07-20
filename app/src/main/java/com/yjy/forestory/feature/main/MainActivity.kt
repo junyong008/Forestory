@@ -3,6 +3,7 @@ package com.yjy.forestory.feature.main
 import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.activity.OnBackPressedCallback
@@ -21,11 +23,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.core.view.marginEnd
 import androidx.core.view.marginTop
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.github.logansdk.permission.PermissionManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -35,6 +39,7 @@ import com.yjy.forestory.databinding.ActivityMainBinding
 import com.yjy.forestory.feature.addPost.AddPostActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.feature.setting.LanguageSettingActivity
+import com.yjy.forestory.feature.setting.ScreenLockSettingActivity
 import com.yjy.forestory.feature.setting.ThemeSettingActivity
 import com.yjy.forestory.feature.setting.UserProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,14 +82,6 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
     }
 
     override fun initView(savedInstanceState: Bundle?) {
-
-        // 유저 프로필이 설정되지 않았다면 첫설정 액티비티로 이동 -> 이거 스플래시 액티비티에서 하는게 좀더 자연스러울듯. 데이터를 가져오는데 시간이 걸림 스플래시 액티비티가 있어야 하는 이유이기도함
-        /*if (!mainViewModel.getIsUserProfileValid()) {
-            val intent = Intent(this@MainActivity, FirstStartActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-            finish()
-        }*/
 
         // 설정값 받아와서 UI 초기화
         initApplicationSettings()
@@ -138,29 +135,33 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
 
                 // 알림 설정이 null이고 버전이 티라미수 아래면 바로 초기 알람을 ON 하고, 위라면 권한 요청을 묻고 ON OFF를 정한다
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    checkNotificationPermission()
+                    checkNotificationPermission(false)
                 } else {
                     mainViewModel.setIsNotificationOn(true)
-                    binding.includedLayout.switchNotification.isOn = true
+                    binding.includedLayout.switchNotification.isChecked = true
                 }
             } else {
-                binding.includedLayout.switchNotification.isOn = currentIsNotificationOn
+                binding.includedLayout.switchNotification.isChecked = currentIsNotificationOn
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun checkNotificationPermission() {
+    private fun checkNotificationPermission(isShowDialog: Boolean) {
 
         val permissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
         PermissionManager.with(this, permissions).check { granted, _, _ ->
 
             if (granted.size == permissions.size) {
                 mainViewModel.setIsNotificationOn(true)
-                binding.includedLayout.switchNotification.isOn = true
+                binding.includedLayout.switchNotification.isChecked = true
+            } else if (isShowDialog) {
+                mainViewModel.setIsNotificationOn(false)
+                binding.includedLayout.switchNotification.isChecked = false
+                showNotificationSettingDialog(this)
             } else {
                 mainViewModel.setIsNotificationOn(false)
-                binding.includedLayout.switchNotification.isOn = false
+                binding.includedLayout.switchNotification.isChecked = false
                 showToast(getString(R.string.notification_permission_denied), R.style.errorToast)
             }
         }
@@ -172,6 +173,24 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun showNotificationSettingDialog(context: Context) {
+        MaterialAlertDialogBuilder(context)
+            .setMessage(getString(R.string.require_notification_permission))
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(getString(R.string.setting)) { dialog, _ ->
+
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                startActivity(intent)
+
+                dialog.dismiss()
+            }
+            .show()
+    }
+
 
     override fun setListener() {
 
@@ -180,6 +199,13 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             val intent = Intent(this, AddPostActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
+        }
+
+        // 맨 처음 게시글 추가 버튼 클릭 리스너
+        binding.buttonStartPost.setOnClickListener {
+            val intent = Intent(this, AddPostActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.fade_in, R.anim.stay)
         }
 
         // 검색 버튼 클릭 리스너
@@ -203,23 +229,16 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             }
 
             // 댓글 알림 ON OFF 감지
-            switchNotification.setOnToggledListener { _, isOn ->
+            switchNotification.setOnCheckedChangeListener  { switch, isChecked  ->
 
-                if (isOn) {
+                if (isChecked) {
 
-                    // 권한이 없다면 스위치를 다시 끄고 권한 요청을 요구
+                    // 권한이 없다면 권한 요청
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isNotificationPermissionGranted()) {
-                        showToast(getString(R.string.require_notification_permission), R.style.errorToast)
+                        switch.isChecked = false
+                        checkNotificationPermission(true)
 
-                        // 즉각 false로 바꾸면 전환 애니메이션이 끝나지 않은 상황에서 변경하는거라 정상적으로 변경이 안됨. 딜레이를 주고 변경
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            switchNotification.isOn = false
-
-                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                            startActivity(intent)
-                        }, 700)
-                        return@setOnToggledListener
+                        return@setOnCheckedChangeListener
                     }
 
                     mainViewModel!!.setIsNotificationOn(true)
@@ -237,6 +256,11 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             menuLanguage.setOnClickListener {
                 startSettingActivity(LanguageSettingActivity::class.java)
             }
+
+            // 화면 잠금 클릭
+            menuScreenLock.setOnClickListener {
+                startSettingActivity(ScreenLockSettingActivity::class.java)
+            }
         }
     }
 
@@ -244,6 +268,17 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
         val intent = Intent(this@MainActivity, targetActivityClass)
         startActivity(intent)
         overridePendingTransition(R.anim.fade_in, R.anim.stay)
+    }
+
+    override fun setObserver() {
+
+        // 게시글이 존재하지 않으면 안내 메시지를 띄운다
+        mainViewModel.postCount.observe(this) {
+
+            binding.tabLayout.visibility = if (it > 0) { View.VISIBLE } else { View.INVISIBLE }
+            binding.ibuttonAddPost.isVisible = (it > 0)
+            binding.linearLayoutNoPost.isVisible = (it <= 0)
+        }
     }
 
 
@@ -272,11 +307,14 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
     override fun onScrollChanged(scrollY: Int) {
         if (isAnimating) return
 
-        // 스크롤이 최상단이라면 배너를 보이고, 아니라면 접는다
+        /*// 스크롤이 최상단이라면 배너를 보이고, 아니라면 접는다
         if (scrollY == 0 && isFolded) {
             unFoldAnimation()
             isFolded = false
-        } else if (scrollY != 0 && !isFolded) {
+        }*/
+
+        // 사용성 증대를 위해 처음 접속시 말고는 인사 메시지를 계속 보여줄 필요는 없다고 판단, 한번 스크롤을 내리면 더이상 펼치지 않음
+        if (scrollY != 0 && !isFolded) {
             foldAnimation()
             isFolded = true
         }

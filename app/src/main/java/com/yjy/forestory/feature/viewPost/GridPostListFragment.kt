@@ -8,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
@@ -56,16 +55,6 @@ class GridPostListFragment: BaseFragment<FragmentGridPostListBinding>(R.layout.f
                 super.onScrolled(recyclerView, dx, dy)
                 recyclerViewScrollListener?.onScrollChanged(recyclerView.computeVerticalScrollOffset())
             }
-        })
-    }
-
-
-    override fun setObserver() {
-
-        // 게시글이 존재하지 않으면 안내 메시지를 띄운다
-        postViewModel.postCount.observe(viewLifecycleOwner, Observer {
-            binding.imageViewInfo.isVisible = (it <= 0)
-            binding.textViewInfo.isVisible = (it <= 0)
         })
     }
 
