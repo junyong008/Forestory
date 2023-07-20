@@ -63,7 +63,7 @@ object NotificationHelper {
         return ForegroundInfo(requestCode, notification)
     }
 
-    fun sendNewCommentNotification(context: Context, postId: Int) {
+    fun sendNewCommentNotification(context: Context, postId: Int, title: String, content: String) {
         val requestCode = System.currentTimeMillis().toInt() // 매번 알림이 쌓이도록
 
         val intent1 = Intent(context, MainActivity::class.java).apply {
@@ -84,8 +84,8 @@ object NotificationHelper {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logo)
-            .setContentTitle(context.getString(R.string.noti_title_new_comment))
-            .setContentText(context.getString(R.string.noti_content_new_comment))
+            .setContentTitle(title)
+            .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
