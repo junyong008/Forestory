@@ -91,4 +91,7 @@
     <string name="nodata_restore">No data to restore</string>
     <string name="notify_post_exist_shared">There\'s a post announcing the news\nPlease try again in a momentarily</string>
     <string name="can_not_exit_while_backup_restore">Unable to exit during data backup/restore</string>
+    <string name="info">Info</string>
+    <string name="click_confirm_to_agree_privacy_policy">By clicking the confirm button, you agree to the privacy policy</string>
+    <string name="highlight_privacy_policy">privacy policy</string>
 </resources>

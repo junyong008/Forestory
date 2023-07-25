@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -29,10 +30,13 @@ import androidx.core.view.marginTop
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.github.logansdk.permission.PermissionManager
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.yjy.forestory.BuildConfig
+import com.yjy.forestory.Const.PRIVACY_POLICY_URL
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityMainBinding
@@ -119,6 +123,9 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
+
+        // 버전 명 설정
+        binding.includedLayout.textViewVersion.text = BuildConfig.VERSION_NAME
     }
 
     private suspend fun initApplicationSettings() {
@@ -273,6 +280,18 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             // 데이터 백업/복원 클릭
             menuBackUp.setOnClickListener {
                 startSettingActivity(BackupActivity::class.java)
+            }
+
+            // 개인정보처리방침 클릭
+            menuPrivacyPolicy.setOnClickListener {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
+                startActivity(browserIntent)
+            }
+
+            // 오픈소스 라이선스 클릭
+            menuOpenSource.setOnClickListener {
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.setting_open_source))
+                startSettingActivity(OssLicensesMenuActivity::class.java)
             }
         }
     }

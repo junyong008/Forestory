@@ -8,14 +8,23 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.github.logansdk.permission.PermissionManager
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import com.yjy.forestory.Const.GENDER_FEMALE
 import com.yjy.forestory.Const.GENDER_MALE
+import com.yjy.forestory.Const.PRIVACY_POLICY_URL
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityUserProfileBinding
@@ -53,6 +62,35 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
 
         // 초기 설정인지 확인. 초기 설정이라면 확인버튼을 누를때 바로 MainActivity로 이동하게끔 한다
         isFirstSet = intent.getBooleanExtra("isFirstSet", false)
+
+        // 초기 설정이라면 확인시 개인정보 처리방침에 동의하게됨을 알림
+        if (isFirstSet) {
+            val spannable = SpannableString(getString(R.string.click_confirm_to_agree_privacy_policy))
+            val highlightText = getString(R.string.highlight_privacy_policy)
+
+            val clickableSpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
+                    startActivity(browserIntent)
+                }
+
+                override fun updateDrawState(ds: TextPaint) {
+                    super.updateDrawState(ds)
+                    ds.isUnderlineText = true
+                    ds.color = ContextCompat.getColor(this@UserProfileActivity, R.color.green)
+                }
+            }
+
+            val start = spannable.indexOf(highlightText)
+            val end = start + highlightText.length
+            spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            binding.textViewSighupInfo.apply {
+                text = spannable
+                movementMethod = LinkMovementMethod.getInstance()
+                isVisible = true
+            }
+        }
     }
 
     override fun setListener() {
