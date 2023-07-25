@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.setting
+package com.yjy.forestory.feature.userProfile
 
 import EventObserver
 import android.Manifest
@@ -81,9 +81,11 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
             var uploadImage: Uri? = userProfileViewModel.currentUserPicture.value
 
             // 프로필 사진을 설정하지 않았다면 기본 프로필 사진을 따로 저장하여 설정
-            if (uploadImage == null) {
+            uploadImage = if (uploadImage == null) {
                 val defaultUserImage: Uri = Uri.parse("android.resource://$packageName/${R.drawable.ic_user}")
-                uploadImage = ImageUtils.copyImageToInternalStorage(this, defaultUserImage)
+                ImageUtils.saveUserProfileToInternalStorage(this, defaultUserImage)
+            } else {
+                ImageUtils.saveUserProfileToInternalStorage(this, userProfileViewModel.currentUserPicture.value!!)
             }
 
             val uploadGender = userProfileViewModel.currentUserGender.value

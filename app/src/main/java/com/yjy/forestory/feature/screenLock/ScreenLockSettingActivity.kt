@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.setting
+package com.yjy.forestory.feature.screenLock
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,8 +9,7 @@ import androidx.core.view.isVisible
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityScreenLockSettingBinding
-import com.yjy.forestory.feature.init.InputPasswdActivity
-import com.yjy.forestory.feature.init.InputPasswdActivity.Companion.CHANGE_PASSWORD
+import com.yjy.forestory.feature.screenLock.InputPasswdActivity.Companion.CHANGE_PASSWORD
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

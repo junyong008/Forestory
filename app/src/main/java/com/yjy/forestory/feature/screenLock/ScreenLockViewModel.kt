@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.setting
+package com.yjy.forestory.feature.screenLock
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

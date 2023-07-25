@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="userProfileViewModel"
-            type="com.yjy.forestory.feature.setting.UserProfileViewModel" />
+            type="com.yjy.forestory.feature.userProfile.UserProfileViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

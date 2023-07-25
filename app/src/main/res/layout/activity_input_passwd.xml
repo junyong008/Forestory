@@ -9,7 +9,7 @@
             type="int" />
         <variable
             name="inputPasswordViewModel"
-            type="com.yjy.forestory.feature.init.InputPasswordViewModel" />
+            type="com.yjy.forestory.feature.screenLock.InputPasswordViewModel" />
     </data>
 
     <LinearLayout

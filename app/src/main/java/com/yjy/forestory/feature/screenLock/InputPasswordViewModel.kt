@@ -1,11 +1,11 @@
-package com.yjy.forestory.feature.init
+package com.yjy.forestory.feature.screenLock
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yjy.forestory.feature.init.InputPasswdActivity.Companion.CHECK_BIO_PASSWORD
-import com.yjy.forestory.feature.init.InputPasswdActivity.Companion.CHECK_PASSWORD
+import com.yjy.forestory.feature.screenLock.InputPasswdActivity.Companion.CHECK_BIO_PASSWORD
+import com.yjy.forestory.feature.screenLock.InputPasswdActivity.Companion.CHECK_PASSWORD
 import com.yjy.forestory.model.repository.SettingRepository
 import com.yjy.forestory.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +49,8 @@ class InputPasswordViewModel @Inject constructor(
 
                 // 현 비밀번호가 4자리 꽉차고, 버퍼 변수에도 비밀번호가 있다면 둘이 일치 여부를 확인해서 비밀번호 신규 설정 or 변경
                 currentDigits.add(digit)
+                _passwordDigits.value = currentDigits
+
                 if (currentDigits == confirmDigits) {
                     val inputPassword: String = confirmDigits.joinToString()
                     settingRepository.setPassword(inputPassword)
@@ -61,6 +63,7 @@ class InputPasswordViewModel @Inject constructor(
 
                 // 현 비밀번호가 4자리 꽉 찼을때
                 currentDigits.add(digit)
+                _passwordDigits.value = currentDigits
 
                 if (mode == CHECK_PASSWORD || mode == CHECK_BIO_PASSWORD) {
 

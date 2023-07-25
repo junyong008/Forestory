@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
@@ -61,16 +62,19 @@
 
 
         <activity
-            android:name=".feature.init.InputPasswdActivity"
+            android:name=".feature.backup.BackupActivity"
             android:exported="false" />
         <activity
-            android:name=".feature.setting.ScreenLockSettingActivity"
+            android:name=".feature.screenLock.InputPasswdActivity"
+            android:exported="false" />
+        <activity
+            android:name=".feature.screenLock.ScreenLockSettingActivity"
             android:exported="false" />
         <activity
             android:name=".feature.init.FirstStartActivity"
             android:exported="false" />
         <activity
-            android:name=".feature.setting.UserProfileActivity"
+            android:name=".feature.userProfile.UserProfileActivity"
             android:exported="false" />
         <activity
             android:name=".feature.setting.LanguageSettingActivity"

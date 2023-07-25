@@ -5,7 +5,7 @@ import android.os.Bundle
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityFirstStartBinding
-import com.yjy.forestory.feature.setting.UserProfileActivity
+import com.yjy.forestory.feature.userProfile.UserProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

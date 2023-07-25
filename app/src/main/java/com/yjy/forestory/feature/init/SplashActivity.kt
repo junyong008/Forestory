@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.yjy.forestory.R
 import com.yjy.forestory.feature.main.MainActivity
+import com.yjy.forestory.feature.screenLock.InputPasswdActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

@@ -1,10 +1,13 @@
-package com.yjy.forestory.feature.init
+package com.yjy.forestory.feature.screenLock
 
 import EventObserver
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.View
 import android.view.animation.CycleInterpolator
 import androidx.activity.OnBackPressedCallback
@@ -133,6 +136,7 @@ class InputPasswdActivity: BaseActivity<ActivityInputPasswdBinding>(R.layout.act
                 showToast(getString(R.string.password_set_complete), R.style.successToast)
                 onBackPressedCallback.handleOnBackPressed()
             } else {
+                vibrate()
                 shakeView(binding.linearLayoutDigits)
                 showToast(getString(R.string.password_unmatch), R.style.errorToast)
             }
@@ -143,10 +147,20 @@ class InputPasswdActivity: BaseActivity<ActivityInputPasswdBinding>(R.layout.act
             if (isMatch) {
                 startMainActivity()
             } else {
+                vibrate()
                 shakeView(binding.linearLayoutDigits)
                 showToast(getString(R.string.password_unmatch), R.style.errorToast)
             }
         })
+    }
+
+    private fun vibrate() {
+        val vibrator = getSystemService(Vibrator::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator?.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator?.vibrate(300) //deprecated in API 26
+        }
     }
 
     private fun shakeView(view: View) {

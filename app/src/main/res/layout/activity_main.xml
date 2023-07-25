@@ -159,9 +159,7 @@
                     android:fontFamily="@font/kjcgothic_bold"
                     android:text="@string/start"
                     android:textColor="@color/white"
-                    android:background="@drawable/button_green_circle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:background="@drawable/button_green_circle" />
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatImageButton

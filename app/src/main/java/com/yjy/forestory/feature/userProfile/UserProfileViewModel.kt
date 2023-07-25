@@ -1,4 +1,4 @@
-package com.yjy.forestory.feature.setting
+package com.yjy.forestory.feature.userProfile
 
 import android.net.Uri
 import androidx.lifecycle.*
