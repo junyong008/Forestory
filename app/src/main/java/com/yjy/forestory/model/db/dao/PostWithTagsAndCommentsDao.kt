@@ -33,6 +33,9 @@ interface PostWithTagsAndCommentsDao {
     @Query("UPDATE Post SET isAddingComments = :value WHERE postId = :postId OR :postId IS NULL")
     suspend fun updatePostIsAddingComments(value: Int, postId: Int? = null)
 
+    @Query("SELECT EXISTS(SELECT * FROM Post WHERE isAddingComments = 1)")
+    suspend fun isAddingCommentsExist(): Boolean
+
 
     // Comment 테이블 접근
     @Insert(onConflict = OnConflictStrategy.IGNORE)

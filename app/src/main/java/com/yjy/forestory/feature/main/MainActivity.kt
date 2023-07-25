@@ -37,11 +37,11 @@ import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityMainBinding
 import com.yjy.forestory.feature.addPost.AddPostActivity
+import com.yjy.forestory.feature.backup.BackupActivity
+import com.yjy.forestory.feature.screenLock.ScreenLockSettingActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
-import com.yjy.forestory.feature.setting.LanguageSettingActivity
-import com.yjy.forestory.feature.setting.ScreenLockSettingActivity
-import com.yjy.forestory.feature.setting.ThemeSettingActivity
-import com.yjy.forestory.feature.setting.UserProfileActivity
+import com.yjy.forestory.feature.setting.*
+import com.yjy.forestory.feature.userProfile.UserProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -83,8 +83,18 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
 
     override fun initView(savedInstanceState: Bundle?) {
 
-        // 설정값 받아와서 UI 초기화
-        initApplicationSettings()
+        lifecycleScope.launch {
+
+            // 설정값 받아와서 UI 초기화
+            initApplicationSettings()
+
+            // 만약 백업/복원 진행중이라면 백업 액티비티로 강제 이동
+            if (mainViewModel.getIsBackupOrRestoreInProgress()) {
+                val intent = Intent(this@MainActivity, BackupActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(0, 0)
+            }
+        }
 
         // viewPager 설정
         val viewPager: ViewPager2 = binding.viewPager
@@ -111,38 +121,36 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
         })
     }
 
-    private fun initApplicationSettings() {
-        lifecycleScope.launch {
-            val currentTheme = mainViewModel.getCurrentTheme()
-            if (currentTheme != null) {
-                AppCompatDelegate.setDefaultNightMode(currentTheme)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                mainViewModel.setTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            }
+    private suspend fun initApplicationSettings() {
+        val currentTheme = mainViewModel.getCurrentTheme()
+        if (currentTheme != null) {
+            AppCompatDelegate.setDefaultNightMode(currentTheme)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            mainViewModel.setTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
 
-            val currentLanguage = mainViewModel.getCurrentLanguage()
-            if (currentLanguage != null) {
-                val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(currentLanguage)
-                AppCompatDelegate.setApplicationLocales(appLocale)
-            } else {
-                val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-                mainViewModel.setLanguage(currentLocale)
-            }
+        val currentLanguage = mainViewModel.getCurrentLanguage()
+        if (currentLanguage != null) {
+            val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(currentLanguage)
+            AppCompatDelegate.setApplicationLocales(appLocale)
+        } else {
+            val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+            mainViewModel.setLanguage(currentLocale)
+        }
 
-            val currentIsNotificationOn = mainViewModel.getCurrentIsNotificationOn()
-            if (currentIsNotificationOn == null) {
+        val currentIsNotificationOn = mainViewModel.getCurrentIsNotificationOn()
+        if (currentIsNotificationOn == null) {
 
-                // 알림 설정이 null이고 버전이 티라미수 아래면 바로 초기 알람을 ON 하고, 위라면 권한 요청을 묻고 ON OFF를 정한다
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    checkNotificationPermission(false)
-                } else {
-                    mainViewModel.setIsNotificationOn(true)
-                    binding.includedLayout.switchNotification.isChecked = true
-                }
+            // 알림 설정이 null이고 버전이 티라미수 아래면 바로 초기 알람을 ON 하고, 위라면 권한 요청을 묻고 ON OFF를 정한다
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                checkNotificationPermission(false)
             } else {
-                binding.includedLayout.switchNotification.isChecked = currentIsNotificationOn
+                mainViewModel.setIsNotificationOn(true)
+                binding.includedLayout.switchNotification.isChecked = true
             }
+        } else {
+            binding.includedLayout.switchNotification.isChecked = currentIsNotificationOn
         }
     }
 
@@ -260,6 +268,11 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             // 화면 잠금 클릭
             menuScreenLock.setOnClickListener {
                 startSettingActivity(ScreenLockSettingActivity::class.java)
+            }
+
+            // 데이터 백업/복원 클릭
+            menuBackUp.setOnClickListener {
+                startSettingActivity(BackupActivity::class.java)
             }
         }
     }

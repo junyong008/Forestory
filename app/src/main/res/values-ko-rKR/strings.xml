@@ -68,4 +68,26 @@
     <string name="change_password">비밀번호 변경</string>
     <string name="enter_new_password">새로운 비밀번호를 입력해주세요</string>
     <string name="warning_password">비밀번호 분실 시 복구가 불가능합니다</string>
+    <string name="data_backup">데이터 백업</string>
+    <string name="data_restore">데이터 복원</string>
+    <string name="linkage">연동</string>
+    <string name="unlink">해제</string>
+    <string name="confirm_disconnect_account">연동을 해제하시겠습니까?</string>
+    <string name="connected_google_drive">Google Drive 와 연동되었습니다</string>
+    <string name="disconnected_google_drive">Google Drive 와 연동이 해제되었습니다</string>
+    <string name="fail_connect_google_drive">Google Drive 연동에 실패했습니다</string>
+    <string name="fail_disconnect_google_drive">Google Drive 연동 해지에 실패했습니다</string>
+    <string name="fail_backup">데이터 백업 실패</string>
+    <string name="success_backup">데이터가 백업되었습니다</string>
+    <string name="noti_title_backup">데이터를 백업중입니다</string>
+    <string name="backup_start">데이터 백업이 시작되었습니다</string>
+    <string name="confirm_want_to_backup">백업을 진행하시겠습니까?</string>
+    <string name="noti_title_restore">데이터를 복원중입니다</string>
+    <string name="success_restore">데이터가 복원되었습니다</string>
+    <string name="fail_restore">데이터 복원 실패</string>
+    <string name="confirm_want_to_restore">복원을 진행하시겠습니까?\n현재 작성된 게시글은 삭제됩니다</string>
+    <string name="restore_start">데이터 복원이 시작되었습니다</string>
+    <string name="nodata_restore">복원할 데이터가 존재하지 않습니다</string>
+    <string name="notify_post_exist_shared">소식을 알리고 있는 게시글이 있습니다\n잠시후 다시 시도해주세요</string>
+    <string name="can_not_exit_while_backup_restore">데이터 백업/복원 중에는 나갈 수 없습니다</string>
 </resources>

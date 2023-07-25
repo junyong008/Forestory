@@ -31,9 +31,12 @@ class LanguageSettingActivity: BaseActivity<ActivityLanguageSettingBinding>(R.la
             val radioButton = when(mainViewModel.getCurrentLanguage()) {
                 "ko" -> R.id.radio_kor
                 "en-US" -> R.id.radio_eng
-                else -> R.id.radio_kor
+                else -> null
             }
-            binding.radioGroup.check(radioButton)
+            
+            radioButton?.let {
+                binding.radioGroup.check(it)
+            }
         }
     }
 

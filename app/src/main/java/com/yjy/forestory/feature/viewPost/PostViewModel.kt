@@ -6,19 +6,26 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
+import com.yjy.forestory.model.repository.SettingRepository
 import com.yjy.forestory.util.Event
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton // 싱글톤으로 구성하여 게시글의 조회, 수정, 삭제 등을 모두 총괄함.
 class PostViewModel @Inject constructor(
-    private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository
+    private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository,
+    private val settingRepository: SettingRepository
 ) : ViewModel() {
 
-    // ---------------------------------- 모든 게시글, 태그, 댓글 조회
+    // ---------------------------------- 모든 게시글, 태그, 댓글 조회 : 만약 데이터 복원이 발생하면 PagingData를 새로 가져옴.
+    @OptIn(ExperimentalCoroutinesApi::class)
     val postWithTagsAndCommentsList: LiveData<PagingData<PostWithTagsAndComments>> =
-        postWithTagsAndCommentsRepository.getPostWithTagsAndCommentsList().cachedIn(viewModelScope).asLiveData()
+        settingRepository.getIsRestoreInProgress().flatMapLatest {
+            postWithTagsAndCommentsRepository.getPostWithTagsAndCommentsList().cachedIn(viewModelScope)
+        }.asLiveData()
 
     // ---------------------------------- 특정 게시글 및 댓글 조회
     fun getPostWithTagsAndComments(postId: Int): LiveData<PostWithTagsAndComments?> =

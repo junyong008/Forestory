@@ -15,6 +15,8 @@ class SettingRepositoryImpl(private val context: Context): SettingRepository {
         private val KEY_NOTIFICATION = booleanPreferencesKey("setting_notification")
         private val KEY_PASSWORD = stringPreferencesKey("setting_password")
         private val KEY_BIO_PASSWORD = booleanPreferencesKey("setting_bio_password")
+        private val KEY_BACKUP_PROGRESS = booleanPreferencesKey("setting_backup_progress")
+        private val KEY_RESTORE_PROGRESS = booleanPreferencesKey("setting_restore_progress")
     }
 
     private val Context.settingDataStore: DataStore<Preferences> by preferencesDataStore(name = "setting_preferences")
@@ -75,6 +77,28 @@ class SettingRepositoryImpl(private val context: Context): SettingRepository {
             settings[KEY_BIO_PASSWORD] = isOn
         }
     }
+
+    override fun getIsBackupInProgress(): Flow<Boolean?> {
+        return dataStore.data.map { preferences ->
+            preferences[KEY_BACKUP_PROGRESS]
+        }
+    }
+    override suspend fun setIsBackupInProgress(isProgress: Boolean) {
+        dataStore.edit { settings ->
+            settings[KEY_BACKUP_PROGRESS] = isProgress
+        }
+    }
+
+    override fun getIsRestoreInProgress(): Flow<Boolean?> {
+        return dataStore.data.map { preferences ->
+            preferences[KEY_RESTORE_PROGRESS]
+        }
+    }
+    override suspend fun setIsRestoreInProgress(isProgress: Boolean) {
+        dataStore.edit { settings ->
+            settings[KEY_RESTORE_PROGRESS] = isProgress
+        }
+    }
 }
 
 interface SettingRepository {
@@ -88,4 +112,8 @@ interface SettingRepository {
     suspend fun setPassword(password: String)
     fun getIsBioPassword(): Flow<Boolean?>
     suspend fun setIsBioPassword(isOn: Boolean)
+    fun getIsBackupInProgress(): Flow<Boolean?>
+    suspend fun setIsBackupInProgress(isProgress: Boolean)
+    fun getIsRestoreInProgress(): Flow<Boolean?>
+    suspend fun setIsRestoreInProgress(isProgress: Boolean)
 }

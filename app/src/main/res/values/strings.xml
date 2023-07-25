@@ -69,4 +69,26 @@
     <string name="change_password">Change Password</string>
     <string name="enter_new_password">Please enter a new password</string>
     <string name="warning_password">If you lose your password, you cannot recover it</string>
+    <string name="data_backup">Back up data</string>
+    <string name="data_restore">Restore data</string>
+    <string name="linkage">LINKAGE</string>
+    <string name="unlink">UNLINK</string>
+    <string name="confirm_disconnect_account">Do you want to disconnect Google Drive?</string>
+    <string name="connected_google_drive">Connected to Google Drive</string>
+    <string name="disconnected_google_drive">Disconnected to Google Drive</string>
+    <string name="fail_connect_google_drive">Failed to connect with Google Drive</string>
+    <string name="fail_disconnect_google_drive">Failed to disconnect with Google Drive</string>
+    <string name="fail_backup">Data backup failed</string>
+    <string name="success_backup">Your data has been backed up</string>
+    <string name="noti_title_backup">Backup in progress</string>
+    <string name="backup_start">Data backup started</string>
+    <string name="confirm_want_to_backup">Do you want to proceed with the backup?</string>
+    <string name="noti_title_restore">Restore in progress</string>
+    <string name="success_restore">Your data has been restored</string>
+    <string name="fail_restore">Data restore failed</string>
+    <string name="confirm_want_to_restore">Do you want to proceed with the restore?\nPosts currently created will be deleted</string>
+    <string name="restore_start">Data restore started</string>
+    <string name="nodata_restore">No data to restore</string>
+    <string name="notify_post_exist_shared">There\'s a post announcing the news\nPlease try again in a momentarily</string>
+    <string name="can_not_exit_while_backup_restore">Unable to exit during data backup/restore</string>
 </resources>

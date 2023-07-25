@@ -29,6 +29,12 @@ class MainViewModel @Inject constructor(
     val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
 
 
+    // 데이터를 복원 혹은 백업 중인지
+    suspend fun getIsBackupOrRestoreInProgress(): Boolean {
+        return (settingRepository.getIsBackupInProgress().firstOrNull() == true || settingRepository.getIsRestoreInProgress().firstOrNull() == true)
+    }
+
+
     // 어플 실행시 설정값에 따른 UI 업데이트를 위한 설정값 접근 함수
     suspend fun getCurrentTheme(): Int? {
         return settingRepository.getTheme().firstOrNull()

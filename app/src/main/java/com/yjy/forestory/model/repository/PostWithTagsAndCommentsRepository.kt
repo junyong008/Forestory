@@ -38,6 +38,10 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
         postWithTagsAndCommentsDao.updatePostIsAddingComments(value, postId)
     }
 
+    override suspend fun getIsAddingCommentsExist(): Boolean {
+        return postWithTagsAndCommentsDao.isAddingCommentsExist()
+    }
+
 
 
     // Comment
@@ -159,6 +163,7 @@ interface PostWithTagsAndCommentsRepository {
     fun getPostCount(keyword: String? = null): Flow<Int>
     fun getPostCountByTag(keytag: String?): Flow<Int>
     suspend fun updatePostIsAddingComments(value: Int, postId: Int? = null)
+    suspend fun getIsAddingCommentsExist(): Boolean
 
     // Comment
     suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, language: String?, postImage: MultipartBody.Part?): Int

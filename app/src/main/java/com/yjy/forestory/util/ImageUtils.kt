@@ -75,6 +75,31 @@ object ImageUtils {
         return null
     }
 
+    // 유저 프로필은 별도로 저장하여 데이터 복원시 삭제 방지
+    fun saveUserProfileToInternalStorage(context: Context, sourceUri: Uri): Uri? {
+        // 파일 이름 생성
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "ForestoryProfile_$timeStamp.jpg"
+
+        try {
+            // 입력받은 Uri의 이미지 파일을 어플 내부 디렉터리로 복사
+            val outputDir = context.filesDir
+            val outputFile = File(outputDir, fileName)
+            context.contentResolver.openInputStream(sourceUri)?.use { inputStream ->
+                FileOutputStream(outputFile).use { output ->
+                    inputStream.copyTo(output)
+                }
+            }
+
+            // 복사한 이미지의 Uri 반환
+            return FileProvider.getUriForFile(context, context.packageName + ".fileprovider", outputFile)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return null
+    }
+
     // 서버 전송을 위한 Uri -> Multipart 변환 함수
 
     fun uriToMultipart(context: Context, uri: Uri): MultipartBody.Part? {
