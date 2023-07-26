@@ -12,13 +12,11 @@ import androidx.work.ForegroundInfo
 import com.yjy.forestory.R
 import com.yjy.forestory.feature.backup.BackupActivity
 import com.yjy.forestory.feature.init.SplashActivity
-import com.yjy.forestory.feature.main.MainActivity
 import com.yjy.forestory.feature.viewPost.PostActivity
 
 object NotificationHelper {
 
     private const val CHANNEL_ID = "CHANNEL_NEW_COMMENT"
-    private const val BACKUP_NOTIFICATION_ID = 0
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -39,7 +37,7 @@ object NotificationHelper {
     fun createGettingCommentsForegroundInfo(context: Context, postId: Int): ForegroundInfo {
         val requestCode = System.currentTimeMillis().toInt() // 매번 알림이 쌓이도록
 
-        val intent1 = Intent(context, MainActivity::class.java).apply {
+        val intent1 = Intent(context, SplashActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
@@ -99,6 +97,7 @@ object NotificationHelper {
 
     // 데이터 백업, 복원을 위한 알림
     fun createBackupForegroundInfo(context: Context, isBackup: Boolean): ForegroundInfo {
+        val requestCode = System.currentTimeMillis().toInt()
 
         val title = if (isBackup) {
             context.getString(R.string.noti_title_backup)
@@ -113,7 +112,7 @@ object NotificationHelper {
             .setOngoing(true)
             .build()
 
-        return ForegroundInfo(BACKUP_NOTIFICATION_ID, notification)
+        return ForegroundInfo(requestCode, notification)
     }
 
     fun sendBackupCompleteNotification(context: Context, title: String) {
