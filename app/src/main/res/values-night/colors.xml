@@ -3,10 +3,14 @@
     <color name="green">#FF5EA152</color>
     <color name="lightgreen">#FF93C08B</color>
 
-    <color name="gray">#FF434343</color>
+    <color name="gray">#FFD3D3D3</color>
     <color name="lightgray">#FF1C1C1C</color>
     <color name="darkgray">#FF9B9B9B</color>
 
     <color name="black">#FFFFFFFF</color>
+    <color name="lightblack">#FFDCDCDC</color>
     <color name="white">#FF383838</color>
+
+    <color name="blue">#FF8C93FF</color>
+    <color name="red">#FFFF8C8C</color>
 </resources>

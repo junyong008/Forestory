@@ -8,5 +8,9 @@
     <color name="darkgray">#FF757575</color>
 
     <color name="black">#FF000000</color>
+    <color name="lightblack">#FF3a3a3a</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="blue">#FF8C93FF</color>
+    <color name="red">#FFFF8C8C</color>
 </resources>
