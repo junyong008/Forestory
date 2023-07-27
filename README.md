@@ -13,9 +13,10 @@
 * 게시글을 작성하면 AI가 게시글의 사진과 내용, 작성자 이름과 성별을 분석하여 각 AI 성격에 맞춰 댓글을 작성
 * ListAdapter와 RoomDB Flow를 이용한 리사이클러뷰 데이터 실시간 최신화, Paging을 이용한 무한 스크롤 구현
 * BaseActivity, BaseFragment 를 이용한 보일러플레이트 코드 최소화
-* Hilt를 이용한 의존성 주입, 메인으로 어플이 실행되는 동안 유지되는 뷰모델은 싱글톤으로 구성
+* Hilt를 이용한 의존성 주입, 코드 재사용성 향상
 * CoroutineWorker를 이용한 백그라운드 서버 연동, 데이터 백업/복원 처리
 * MVVM 패턴 적용, ViewModel를 이용한 Configuration Change 대응
+* LiveData, EventObserver, BindingAdapter 등을 이용한 데이터 무결성 보장
 
 ### 프로젝트 설계
 ![플레이스토어 그래픽 이미지](https://github.com/junyong008/Forestory/assets/69251013/39ea1be1-a04a-4f8a-a90c-5400978e95d7)
