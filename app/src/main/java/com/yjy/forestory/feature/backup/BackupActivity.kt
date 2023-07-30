@@ -21,8 +21,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityBackupBinding
-import com.yjy.forestory.util.ConfirmDialog
-import com.yjy.forestory.util.ConfirmDialogInterface
+import com.yjy.forestory.feature.dialog.ConfirmDialog
+import com.yjy.forestory.feature.dialog.ConfirmDialogInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

@@ -7,8 +7,10 @@ import androidx.paging.cachedIn
 import com.yjy.forestory.model.PostWithTagsAndComments
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.SettingRepository
+import com.yjy.forestory.model.repository.TicketRepository
 import com.yjy.forestory.util.Event
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +19,8 @@ import javax.inject.Singleton
 @Singleton // 싱글톤으로 구성하여 게시글의 조회, 수정, 삭제 등을 모두 총괄함.
 class PostViewModel @Inject constructor(
     private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository,
-    private val settingRepository: SettingRepository
+    private val settingRepository: SettingRepository,
+    private val ticketRepository: TicketRepository
 ) : ViewModel() {
 
     // ---------------------------------- 모든 게시글, 태그, 댓글 조회 : 만약 데이터 복원이 발생하면 PagingData를 새로 가져옴.
@@ -90,5 +93,27 @@ class PostViewModel @Inject constructor(
         object CannotDelete: DeletePostResult()
         object Success: DeletePostResult()
         object Failed: DeletePostResult()
+    }
+
+    // ---------------------------------- 티켓 갯수 조회 및 변경
+    suspend fun getCurrentTicket(): Int? {
+        return ticketRepository.getTicket().firstOrNull()
+    }
+    suspend fun getCurrentFreeTicket(): Int? {
+        return ticketRepository.getFreeTicket().firstOrNull()
+    }
+
+    // 무료 티켓이 있으면 무료 티켓 한장 차감, 아니면 일반 티켓 한장 차감
+    fun useTicket() {
+        viewModelScope.launch {
+            val currentTicket = ticketRepository.getTicket().firstOrNull()!!
+            val currentFreeTicket = ticketRepository.getFreeTicket().firstOrNull()!!
+
+            if (currentFreeTicket > 0) {
+                ticketRepository.setFreeTicket(currentFreeTicket - 1)
+            } else {
+                ticketRepository.setTicket(currentTicket - 1)
+            }
+        }
     }
 }

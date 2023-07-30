@@ -24,8 +24,11 @@ import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseFragment
 import com.yjy.forestory.databinding.FragmentLinearPostListBinding
 import com.yjy.forestory.feature.main.RecyclerViewScrollListener
+import com.yjy.forestory.feature.purchase.PurchaseActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.util.TicketDialog
+import com.yjy.forestory.util.TicketDialogInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,7 +36,8 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layout.fragment_linear_post_list) {
+class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layout.fragment_linear_post_list),
+    TicketDialogInterface{
 
     @Inject lateinit var postViewModel: PostViewModel
     private var recyclerViewScrollListener: RecyclerViewScrollListener? = null
@@ -143,23 +147,14 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
     private val postItemClickListener = object : PostItemClickListener {
         // 댓글 추가 버튼 클릭 리스너 재정의
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {
+            lifecycleScope.launch {
+                val currentTicketCount = postViewModel.getCurrentTicket()
+                val currentFreeTicketCount = postViewModel.getCurrentFreeTicket()
 
-            // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
-            val post = postWithTagsAndComments.post
-            val parentPostId = post.postId
-            val postContent = post.content
-            val postImage = post.image.toString()
-
-            val inputData = workDataOf(
-                CommentWorker.PARENT_POST_ID_KEY to parentPostId,
-                CommentWorker.POST_CONTENT_KEY to postContent,
-                CommentWorker.POST_IMAGE_KEY to postImage
-            )
-
-            val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
-            WorkManager.getInstance(requireContext()).enqueue(commentWorkRequest)
-
-            Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
+                if (currentTicketCount != null && currentFreeTicketCount != null) {
+                    TicketDialog.newInstance(currentTicketCount, currentFreeTicketCount, postWithTagsAndComments, this@LinearPostListFragment).show(parentFragmentManager, TicketDialog.TAG)
+                }
+            }
         }
 
         // 이미지 클릭 리스너 재정의
@@ -181,6 +176,38 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
             startActivity(intent)
             activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.stay)
         }
+    }
+
+    // 댓글 받아오기 버튼 다이얼로그 처리
+    override fun onDeliverClick(isNeedToCharge: Boolean, postWithTagsAndComments: PostWithTagsAndComments) {
+
+        // 티켓 충전이 필요하면 충전 액티비티로 이동
+        if (isNeedToCharge) {
+            val intent = Intent(activity, PurchaseActivity::class.java)
+            startActivity(intent)
+            requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.stay)
+
+            return
+        }
+
+        // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
+        val post = postWithTagsAndComments.post
+        val parentPostId = post.postId
+        val postContent = post.content
+        val postImage = post.image.toString()
+
+        val inputData = workDataOf(
+            CommentWorker.PARENT_POST_ID_KEY to parentPostId,
+            CommentWorker.POST_CONTENT_KEY to postContent,
+            CommentWorker.POST_IMAGE_KEY to postImage
+        )
+
+        val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
+        WorkManager.getInstance(requireContext()).enqueue(commentWorkRequest)
+
+        postViewModel.useTicket()
+
+        Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
     }
 
     // 옵션 메뉴를 띄우고 해당 아이템 클릭시 리스너에 알림

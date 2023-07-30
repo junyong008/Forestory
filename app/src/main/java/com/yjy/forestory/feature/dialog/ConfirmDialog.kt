@@ -1,4 +1,4 @@
-package com.yjy.forestory.util
+package com.yjy.forestory.feature.dialog
 
 import android.content.Context
 import android.graphics.Color

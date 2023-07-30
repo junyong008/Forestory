@@ -36,12 +36,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yjy.forestory.BuildConfig
+import com.yjy.forestory.Const.FREE_TICKET_COUNT
 import com.yjy.forestory.Const.PRIVACY_POLICY_URL
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityMainBinding
 import com.yjy.forestory.feature.addPost.AddPostActivity
 import com.yjy.forestory.feature.backup.BackupActivity
+import com.yjy.forestory.feature.purchase.PurchaseActivity
 import com.yjy.forestory.feature.screenLock.ScreenLockSettingActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.feature.setting.*
@@ -91,6 +93,9 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
 
             // 설정값 받아와서 UI 초기화
             initApplicationSettings()
+
+            // 티켓 갯수 초기화
+            initTickets()
 
             // 만약 백업/복원 진행중이라면 백업 액티비티로 강제 이동
             if (mainViewModel.getIsBackupOrRestoreInProgress()) {
@@ -206,6 +211,16 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             .show()
     }
 
+    private suspend fun initTickets() {
+
+        if (mainViewModel.getCurrentTicket() == null) {
+            mainViewModel.setTicket(0)
+        }
+        if (mainViewModel.getCurrentFreeTicket() == null) {
+            mainViewModel.setFreeTicket(FREE_TICKET_COUNT)
+        }
+    }
+
 
     override fun setListener() {
 
@@ -241,6 +256,11 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             // 유저 프로필 편집 버튼 클릭
             ibuttonEditUserInfo.setOnClickListener {
                 startSettingActivity(UserProfileActivity::class.java)
+            }
+
+            // 티켓 충전 버튼 클릭
+            buttonCharge.setOnClickListener {
+                startSettingActivity(PurchaseActivity::class.java)
             }
 
             // 댓글 알림 ON OFF 감지
