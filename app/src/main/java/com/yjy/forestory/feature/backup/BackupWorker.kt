@@ -17,6 +17,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.yjy.forestory.R
 import com.yjy.forestory.model.repository.SettingRepository
+import com.yjy.forestory.model.repository.TicketRepository
 import com.yjy.forestory.util.NotificationHelper
 import com.yjy.forestory.util.NotificationHelper.sendBackupCompleteNotification
 import dagger.assisted.Assisted
@@ -29,7 +30,8 @@ import java.util.*
 class BackupWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val settingRepository: SettingRepository
+    private val settingRepository: SettingRepository,
+    private val ticketRepository: TicketRepository
 ): CoroutineWorker(context, params) {
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -126,6 +128,11 @@ class BackupWorker @AssistedInject constructor(
             RestoreResult.Success -> applicationContext.getString(R.string.success_restore)
             RestoreResult.NoData -> applicationContext.getString(R.string.nodata_restore)
             else -> applicationContext.getString(R.string.fail_restore)
+        }
+
+        // 만약 복원이 성공적으로 끝났다면 무료 체험 기회는 제거하기
+        if (restoreResult == RestoreResult.Success) {
+            ticketRepository.setFreeTicket(0)
         }
 
         val isNotificationOn = settingRepository.getIsNotificationOn().firstOrNull()

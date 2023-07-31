@@ -11,6 +11,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -20,13 +21,17 @@ import com.google.android.material.snackbar.Snackbar
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityPostBinding
+import com.yjy.forestory.feature.purchase.PurchaseActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
 import com.yjy.forestory.model.PostWithTagsAndComments
+import com.yjy.forestory.util.TicketDialog
+import com.yjy.forestory.util.TicketDialogInterface
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post) {
+class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post), TicketDialogInterface {
 
     @Inject lateinit var postViewModel: PostViewModel
     private var postId: Int = -1
@@ -127,24 +132,48 @@ class PostActivity: BaseActivity<ActivityPostBinding>(R.layout.activity_post) {
 
             // 댓글 추가 버튼 클릭 리스너
             binding.buttonAddComment.setOnClickListener {
-                // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
-                val post = postWithTagsAndComments.post
-                val parentPostId = post.postId
-                val postContent = post.content
-                val postImage = post.image.toString()
+                lifecycleScope.launch {
+                    val currentTicketCount = postViewModel.getCurrentTicket()
+                    val currentFreeTicketCount = postViewModel.getCurrentFreeTicket()
 
-                val inputData = workDataOf(
-                    CommentWorker.PARENT_POST_ID_KEY to parentPostId,
-                    CommentWorker.POST_CONTENT_KEY to postContent,
-                    CommentWorker.POST_IMAGE_KEY to postImage
-                )
-
-                val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
-                WorkManager.getInstance(this@PostActivity).enqueue(commentWorkRequest)
-
-                Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
+                    if (currentTicketCount != null && currentFreeTicketCount != null) {
+                        TicketDialog.newInstance(currentTicketCount, currentFreeTicketCount, postWithTagsAndComments, this@PostActivity).show(supportFragmentManager, TicketDialog.TAG)
+                    }
+                }
             }
         }
+    }
+
+    // 댓글 받아오기 버튼 다이얼로그 처리
+    override fun onDeliverClick(isNeedToCharge: Boolean, postWithTagsAndComments: PostWithTagsAndComments) {
+
+        // 티켓 충전이 필요하면 충전 액티비티로 이동
+        if (isNeedToCharge) {
+            val intent = Intent(this, PurchaseActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.fade_in, R.anim.stay)
+
+            return
+        }
+
+        // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
+        val post = postWithTagsAndComments.post
+        val parentPostId = post.postId
+        val postContent = post.content
+        val postImage = post.image.toString()
+
+        val inputData = workDataOf(
+            CommentWorker.PARENT_POST_ID_KEY to parentPostId,
+            CommentWorker.POST_CONTENT_KEY to postContent,
+            CommentWorker.POST_IMAGE_KEY to postImage
+        )
+
+        val commentWorkRequest = OneTimeWorkRequestBuilder<CommentWorker>().setInputData(inputData).build()
+        WorkManager.getInstance(this@PostActivity).enqueue(commentWorkRequest)
+
+        postViewModel.useTicket()
+
+        Snackbar.make(binding.root, getString(R.string.delivering_news_message), Snackbar.LENGTH_SHORT).show()
     }
 
     override fun setEventObserver() {

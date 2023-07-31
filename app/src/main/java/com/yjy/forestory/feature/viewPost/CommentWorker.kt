@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import com.yjy.forestory.R
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.SettingRepository
+import com.yjy.forestory.model.repository.TicketRepository
 import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.ImageUtils
 import com.yjy.forestory.util.NotificationHelper
@@ -22,7 +23,8 @@ class CommentWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository,
     private val userRepository: UserRepository,
-    private val settingRepository: SettingRepository
+    private val settingRepository: SettingRepository,
+    private val ticketRepository: TicketRepository
 ): CoroutineWorker(context, params) {
 
     companion object {
@@ -76,6 +78,13 @@ class CommentWorker @AssistedInject constructor(
         } else {
             Pair(applicationContext.getString(R.string.noti_title_failure),
                 applicationContext.getString(R.string.noti_content_failure))
+        }
+
+        // 성공하지 못했다면 티켓 한개 복원
+        if (!isSuccessful) {
+            ticketRepository.getTicket().firstOrNull()?.let {
+                ticketRepository.setTicket(it + 1)
+            }
         }
 
         val isNotificationOn = settingRepository.getIsNotificationOn().firstOrNull()

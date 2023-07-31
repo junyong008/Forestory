@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
         android:name=".MyApplication"
@@ -32,6 +33,10 @@
             </intent-filter>
         </activity>
 
+        <!-- 애드몹 메타데이터 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3155565379106661~3177288792"/>
 
         <!-- Hilt Worker 사용을 위한 multiprocess 선언 -->
         <provider
@@ -63,6 +68,9 @@
             android:theme="@style/Theme.Forestory" />
 
 
+        <activity
+            android:name=".feature.purchase.PurchaseActivity"
+            android:exported="false" />
         <activity
             android:name=".feature.backup.BackupActivity"
             android:exported="false" />

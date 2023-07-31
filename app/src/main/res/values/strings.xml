@@ -94,4 +94,25 @@
     <string name="info">Info</string>
     <string name="click_confirm_to_agree_privacy_policy">By clicking the confirm button, you agree to the privacy policy</string>
     <string name="highlight_privacy_policy">privacy policy</string>
+    <string name="title_purchase">Purchase tickets</string>
+    <string name="ticket_usage_guide">Ticket Usage Guide\n\n1. Tickets are train passes to the Forest Village, a necessary item to deliver the content of the posts to forest friends.\n\n2. Tickets are stored locally and will be lost if you clear app data or delete the app.\n\n3. Even when using the data backup / restore function, your tickets will not be backed up or restored.</string>
+    <string name="current_tickets">Current Tickets</string>
+    <string name="tickets_2">2 Tickets</string>
+    <string name="tickets_10">10 Tickets</string>
+    <string name="tickets_20">20 Tickets</string>
+    <string name="tickets_60">60 Tickets</string>
+    <string name="tickets_100">100 Tickets</string>
+    <string name="tickets_count">%d tickets</string>
+    <string name="fail_to_connect_payment">Payment service connection failed</string>
+    <string name="fail_to_purchase">An error occurred while purchasing. Please try again</string>
+    <string name="charge">Charge</string>
+    <string name="purchase_complete">Purchase of %d tickets completed</string>
+    <string name="try_for_free">Try for free! (%d remaining)</string>
+    <string name="recharge">Recharge</string>
+    <string name="not_enough_tickets">😢 Not enough tickets</string>
+    <string name="confirm_spend_ticket">Do you want to spend a ticket to deliver the news?</string>
+    <string name="deliver">Deliver</string>
+    <string name="tickets_free">Free Ticket</string>
+    <string name="preparing">Preparing</string>
+    <string name="view_ads">View ads</string>
 </resources>

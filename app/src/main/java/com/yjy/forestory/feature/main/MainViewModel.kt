@@ -7,6 +7,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.SettingRepository
+import com.yjy.forestory.model.repository.TicketRepository
 import com.yjy.forestory.model.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.firstOrNull
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val settingRepository: SettingRepository,
+    private val ticketRepository: TicketRepository,
     private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository
 ) : ViewModel() {
 
@@ -27,6 +29,30 @@ class MainViewModel @Inject constructor(
 
     // 게시글 갯수 조회
     val postCount = postWithTagsAndCommentsRepository.getPostCount().asLiveData()
+
+
+    // 티켓 갯수 조회 및 변경
+    val tickets = ticketRepository.getTicket().asLiveData()
+    val freeTickets = ticketRepository.getFreeTicket().asLiveData()
+
+    suspend fun getCurrentTicket(): Int? {
+        return ticketRepository.getTicket().firstOrNull()
+    }
+    suspend fun getCurrentFreeTicket(): Int? {
+        return ticketRepository.getFreeTicket().firstOrNull()
+    }
+    fun setTicket(count: Int) {
+        viewModelScope.launch {
+            ticketRepository.setTicket(count)
+        }
+    }
+    fun setFreeTicket(count: Int) {
+        viewModelScope.launch {
+            ticketRepository.setFreeTicket(count)
+        }
+    }
+
+
 
 
     // 데이터를 복원 혹은 백업 중인지

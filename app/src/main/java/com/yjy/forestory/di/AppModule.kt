@@ -38,4 +38,10 @@ object AppModule {
     fun provideSettingRepository(@ApplicationContext context: Context): SettingRepository {
         return SettingRepositoryImpl(context)
     }
+
+    @Singleton
+    @Provides
+    fun provideTicketRepository(@ApplicationContext context: Context): TicketRepository {
+        return TicketRepositoryImpl(context)
+    }
 }
