@@ -20,10 +20,10 @@
 * 인앱 결제, 리워드 애드몹을 통한 재화 구매 및 사용
 
 ### 프로젝트 설계
-![플레이스토어 그래픽 이미지](https://github.com/junyong008/Forestory/assets/69251013/39ea1be1-a04a-4f8a-a90c-5400978e95d7)
-![플레이 스토어 앱 스크린샷 모음](https://github.com/junyong008/Forestory/assets/69251013/4b688f86-f856-45f0-90d9-b4122b306e07)
-![0](https://github.com/junyong008/Forestory/assets/69251013/13911e59-3b67-48b0-a2c9-6e115cef9a64)
-![1](https://github.com/junyong008/Forestory/assets/69251013/95356f0a-8fbe-49dc-9131-cbd707ea322a)
-![2](https://github.com/junyong008/Forestory/assets/69251013/b19ad730-624e-4f8d-8ce4-972a6ef93fc6)
-![3 수정](https://github.com/junyong008/Forestory/assets/69251013/ca13864a-3189-4d6b-9171-8fba4ea39fed)
-![4](https://github.com/junyong008/Forestory/assets/69251013/bb8aae24-669a-43d9-89ab-d96e5751f171)
+![플레이스토어 그래픽 이미지](https://github.com/junyong008/Forestory/assets/69251013/62af564d-fa8e-40ea-8884-a5a7e2c5d3b2)
+![플레이 스토어 앱 스크린샷 모음](https://github.com/junyong008/Forestory/assets/69251013/89c340e9-3744-436c-92f9-b3460a7cbee8)
+![0](https://github.com/junyong008/Forestory/assets/69251013/5d3b5383-4db4-4934-be4c-cc1b3c930503)
+![1](https://github.com/junyong008/Forestory/assets/69251013/0fda90d0-f357-48d5-8664-129d5bc47143)
+![2](https://github.com/junyong008/Forestory/assets/69251013/3e398345-f0c2-4f2c-9325-835548c761ab)
+![3 수정](https://github.com/junyong008/Forestory/assets/69251013/5e939ba8-f5aa-4d91-9442-a2115a854abe)
+![4](https://github.com/junyong008/Forestory/assets/69251013/babb465b-c45f-4eac-b969-35e6a786bcdd)
