@@ -17,6 +17,7 @@
 * CoroutineWorker를 이용한 백그라운드 서버 연동, 데이터 백업/복원 처리
 * MVVM 패턴 적용, ViewModel를 이용한 Configuration Change 대응
 * LiveData, EventObserver, BindingAdapter 등을 이용한 데이터 무결성 보장
+* 인앱 결제, 리워드 애드몹을 통한 재화 구매 및 사용
 
 ### 프로젝트 설계
 ![플레이스토어 그래픽 이미지](https://github.com/junyong008/Forestory/assets/69251013/39ea1be1-a04a-4f8a-a90c-5400978e95d7)
@@ -24,5 +25,5 @@
 ![0](https://github.com/junyong008/Forestory/assets/69251013/13911e59-3b67-48b0-a2c9-6e115cef9a64)
 ![1](https://github.com/junyong008/Forestory/assets/69251013/95356f0a-8fbe-49dc-9131-cbd707ea322a)
 ![2](https://github.com/junyong008/Forestory/assets/69251013/b19ad730-624e-4f8d-8ce4-972a6ef93fc6)
-![3](https://github.com/junyong008/Forestory/assets/69251013/83e0acfd-a4f9-4bc9-b10a-a9e4a704c69d)
+![3 수정](https://github.com/junyong008/Forestory/assets/69251013/ca13864a-3189-4d6b-9171-8fba4ea39fed)
 ![4](https://github.com/junyong008/Forestory/assets/69251013/bb8aae24-669a-43d9-89ab-d96e5751f171)
