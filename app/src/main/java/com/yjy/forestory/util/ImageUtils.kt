@@ -18,7 +18,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 object ImageUtils {
 
@@ -101,38 +102,25 @@ object ImageUtils {
     }
 
     // 서버 전송을 위한 Uri -> Multipart 변환 함수
-
     fun uriToMultipart(context: Context, uri: Uri): MultipartBody.Part? {
         try {
+            // 원본 이미지를 캐시 디렉터리에 임시 파일로 저장
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-            val originalFile = File(context.cacheDir, "temp_file") // 캐시 디렉토리에 임시 파일 생성
-
-            val outputStream = FileOutputStream(originalFile)
-
-            inputStream?.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output) // InputStream에서 OutputStream으로 데이터 복사
-                }
+            val originalFile = File(context.cacheDir, "temp_file") // 임시 파일 생성
+            FileOutputStream(originalFile).use { fileOutputStream ->
+                inputStream?.copyTo(fileOutputStream)
             }
+            inputStream?.close()
 
-            // 이미지 압축
-            val compressedFile = File(context.cacheDir, "temp_compressed_file")
+            // 임시 파일로부터 Bitmap 생성
             val bitmap = BitmapFactory.decodeFile(originalFile.path)
 
-            var quality = 100
-            val maxSizeBytes = 1 * 1024 * 1024 // 1MB를 최대 크기로 지정하고 압축
+            // 이미지 해상도 조정 및 압축
+            val resizedBitmap = resizeImage(bitmap, 512, 512)
+            val compressedFile = File(context.cacheDir, "temp_compressed_file")
+            optimizeImageForUpload(resizedBitmap, compressedFile)
 
-            // 원하는 파일 크기가 될때까지 quality를 줄여가면서 압축
-            var streamLength = maxSizeBytes
-            while (streamLength >= maxSizeBytes) {
-                val fileOutputStream = FileOutputStream(compressedFile)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, fileOutputStream)
-                fileOutputStream.close()
-
-                streamLength = compressedFile.length().toInt()
-                quality -= 5
-            }
-
+            // 최적화된 이미지를 MultipartBody.Part로 변환
             val requestFile: RequestBody = compressedFile.asRequestBody("image/*".toMediaTypeOrNull())
             return MultipartBody.Part.createFormData("image", compressedFile.name, requestFile)
         } catch (e: Exception) {
@@ -140,5 +128,46 @@ object ImageUtils {
         }
 
         return null
+    }
+
+    private fun optimizeImageForUpload(originalBitmap: Bitmap, outputFile: File) {
+        var quality = 100
+        val maxSizeBytes = 1 * 1024 * 1024 // 최대 크기 1MB
+
+        do {
+            val byteArrayOutputStream = FileOutputStream(outputFile)
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            val fileSize = outputFile.length()
+
+            if (fileSize <= maxSizeBytes) break // 파일 크기가 조건을 만족하면 중단
+
+            quality -= 5 // 품질을 점진적으로 줄임
+            byteArrayOutputStream.close()
+        } while (quality > 0)
+    }
+
+    private fun resizeImage(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+
+        if (width <= maxWidth && height <= maxHeight) {
+            return bitmap
+        }
+
+        val bitmapRatio = width.toFloat() / height.toFloat()
+        val maxRatio = maxWidth.toFloat() / maxHeight.toFloat()
+
+        val newWidth: Int
+        val newHeight: Int
+
+        if (bitmapRatio > maxRatio) {
+            newWidth = maxWidth
+            newHeight = (maxWidth / bitmapRatio).toInt()
+        } else {
+            newHeight = maxHeight
+            newWidth = (maxHeight * bitmapRatio).toInt()
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     }
 }
