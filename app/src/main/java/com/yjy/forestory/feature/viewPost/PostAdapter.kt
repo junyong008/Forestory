@@ -38,7 +38,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
             }
         }
 
-        fun bind(postWithTagsAndComments: PostWithTagsAndComments) {
+        fun bind(postWithTagsAndComments: PostWithTagsAndComments, isLastItem: Boolean) {
 
             // 댓글이 없고 만약 추가중이라면 프로그레스 띄우기
             binding.progressBar.isVisible = postWithTagsAndComments.comments.isEmpty() && postWithTagsAndComments.post.isAddingComments
@@ -57,6 +57,12 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
                 chipGroup.addView(newChip)
             }
 
+            // 마지막 아이템인 경우 아래 마진 적용
+            if (isLastItem) {
+                val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
+                layoutParams.bottomMargin = 16
+                itemView.layoutParams = layoutParams
+            }
 
             binding.postWithTagsAndComments = postWithTagsAndComments
         }
@@ -94,7 +100,7 @@ class PostAdapter(private val listener: PostItemClickListener, private val isLin
 
         when (holder) {
             is LinearViewHolder -> {
-                holder.bind(postWithTagsAndComments!!)
+                holder.bind(postWithTagsAndComments!!, position == itemCount - 1)
             }
             is GridViewHolder -> {
                 holder.bind(postWithTagsAndComments!!)

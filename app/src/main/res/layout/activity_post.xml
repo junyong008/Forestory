@@ -94,7 +94,7 @@
                         android:fontFamily="@font/kjcgothic_bold"
                         android:text="@{postWithTagsAndComments.post.userName}"
                         android:textColor="@color/black"
-                        android:textSize="15sp" />
+                        android:textSize="15dp" />
 
                     <TextView
                         android:id="@+id/textView_createDate"
@@ -103,7 +103,7 @@
                         android:fontFamily="@font/kjcgothic_bold"
                         formattedDateTime="@{postWithTagsAndComments.post.createDate}"
                         android:textColor="@color/gray"
-                        android:textSize="11sp" />
+                        android:textSize="11dp" />
 
                 </LinearLayout>
 
@@ -160,6 +160,7 @@
                     android:textColor="@color/black"
                     android:fontFamily="@font/kjcgothic"
                     android:text="@{postWithTagsAndComments.post.content}"
+                    android:textIsSelectable="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/chipgroup_tags" />

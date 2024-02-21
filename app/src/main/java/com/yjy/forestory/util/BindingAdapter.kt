@@ -118,6 +118,20 @@ object BindingAdapter {
         }
     }
 
+    // imageView의 이미지를 Uri로 바인딩 : 그리드뷰에서는 해상도를 조절해 속도 향상
+    @BindingAdapter("gridImageUri")
+    @JvmStatic
+    fun setGridImageUri(imageView: ImageView, imageUri: Uri?) {
+        imageUri?.let {
+            Glide.with(imageView.context)
+                .load(it)
+                .placeholder(R.drawable.bg_lightgray_round)
+                .override(500, 500)
+                .centerCrop()
+                .into(imageView)
+        }
+    }
+
     // textView의 텍스트를 Date로 바인딩
     @BindingAdapter("formattedDateTime")
     @JvmStatic

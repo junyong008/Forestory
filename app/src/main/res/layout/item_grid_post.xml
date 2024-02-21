@@ -23,7 +23,7 @@
 
             <ImageView
                 android:id="@+id/imageView_post"
-                imageUri="@{post.image}"
+                gridImageUri="@{post.image}"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:background="@color/lightgray"

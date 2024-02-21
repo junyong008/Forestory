@@ -112,6 +112,6 @@
     <string name="confirm_spend_ticket">티켓 1개를 소모해 소식을 전달하시겠습니까?</string>
     <string name="deliver">전달하기</string>
     <string name="tickets_free">무료 티켓</string>
-    <string name="preparing">준비중</string>
+    <string name="preparing">로딩중</string>
     <string name="view_ads">광고 보기</string>
 </resources>

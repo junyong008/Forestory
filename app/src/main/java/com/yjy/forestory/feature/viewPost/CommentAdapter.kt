@@ -1,6 +1,7 @@
 package com.yjy.forestory.feature.viewPost
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -12,7 +13,7 @@ import com.yjy.forestory.model.Comment
 class CommentAdapter() : ListAdapter<Comment, CommentAdapter.MyViewHolder>(diffUtil) {
 
     inner class MyViewHolder(private val binding: ItemCommentBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(comment: Comment) {
+        fun bind(comment: Comment, isLastItem: Boolean) {
             binding.comment = comment
 
             // 이름에 따라 이미지 지정
@@ -26,6 +27,10 @@ class CommentAdapter() : ListAdapter<Comment, CommentAdapter.MyViewHolder>(diffU
                 "랑이" -> R.drawable.ic_tiger
                 else -> R.drawable.ic_panda
             }
+
+            // 마지막 아이템인 경우 구분선을 숨김
+            if (isLastItem) binding.divider.visibility = View.GONE
+
             binding.circleImageViewWriterPicture.setImageResource(resourceId)
         }
     }
@@ -36,7 +41,7 @@ class CommentAdapter() : ListAdapter<Comment, CommentAdapter.MyViewHolder>(diffU
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position == itemCount - 1)
     }
 
     companion object {
