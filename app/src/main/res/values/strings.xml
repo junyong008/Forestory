@@ -115,4 +115,5 @@
     <string name="tickets_free">Free Ticket</string>
     <string name="preparing">Preparing</string>
     <string name="view_ads">View ads</string>
+    <string name="duplicate_tag_exist">Duplicated tags exist</string>
 </resources>

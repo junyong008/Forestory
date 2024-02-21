@@ -96,7 +96,7 @@ class AddPostActivity: BaseActivity<ActivityAddPostBinding>(R.layout.activity_ad
         binding.editTag.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
                 if (text.isNotEmpty() && (text.endsWith(" ") || text.endsWith("\n"))) {
-                    val inputText = text.removeSuffix("\n").trim()
+                    val inputText = text.removeSuffix("\n").trim().toString()
 
                     binding.editTag.setText("")
 
@@ -105,10 +105,14 @@ class AddPostActivity: BaseActivity<ActivityAddPostBinding>(R.layout.activity_ad
                             showToast(getString(R.string.max_tag_count_info, addPostViewModel.maxTagCount), R.style.errorToast)
                             return
                         }
+                        if (addPostViewModel.containsTag(inputText)) {
+                            showToast(getString(R.string.duplicate_tag_exist), R.style.errorToast)
+                            return
+                        }
                     }
 
                     if (inputText.isNotEmpty()) {
-                        addPostViewModel.addTag(inputText.toString())
+                        addPostViewModel.addTag(inputText)
                     }
                 }
             }

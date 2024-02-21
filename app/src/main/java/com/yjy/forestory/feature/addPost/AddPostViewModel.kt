@@ -53,6 +53,8 @@ class AddPostViewModel @Inject constructor(
         _tagList.value = currentList
     }
 
+    fun containsTag(inputText: String): Boolean = _tagList.value?.contains(inputText) ?: false
+
 
     // ---------------------------------- 내용 양방향 바인딩
     val contentText = MutableLiveData<String>()

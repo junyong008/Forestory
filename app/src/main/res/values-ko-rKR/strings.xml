@@ -114,4 +114,5 @@
     <string name="tickets_free">무료 티켓</string>
     <string name="preparing">로딩중</string>
     <string name="view_ads">광고 보기</string>
+    <string name="duplicate_tag_exist">중복된 태그입니다.</string>
 </resources>
