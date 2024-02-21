@@ -1,3 +1,4 @@
 /build
+/release
 proguard-rules.pro
 /src/main/java/com/yjy/forestory/Const.kt
