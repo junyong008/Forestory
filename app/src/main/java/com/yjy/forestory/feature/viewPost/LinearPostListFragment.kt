@@ -192,11 +192,15 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
 
         // CommentWorker 를 통해 백그라운드에서 댓글을 서버로 부터 받아오기
         val post = postWithTagsAndComments.post
+        val userName = post.userName
+        val userGender = post.userGender
         val parentPostId = post.postId
         val postContent = post.content
         val postImage = post.image.toString()
 
         val inputData = workDataOf(
+            CommentWorker.USER_NAME_KEY to userName,
+            CommentWorker.USER_GENDER_KEY to userGender,
             CommentWorker.PARENT_POST_ID_KEY to parentPostId,
             CommentWorker.POST_CONTENT_KEY to postContent,
             CommentWorker.POST_IMAGE_KEY to postImage

@@ -19,7 +19,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
-import java.util.*
+import java.util.Date
 
 class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsDao: PostWithTagsAndCommentsDao):
     PostWithTagsAndCommentsRepository {
@@ -133,15 +133,15 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
     }
 
     @WorkerThread
-    override suspend fun insertPostWithTags(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean {
+    override suspend fun insertPostWithTags(userName: String?, userGender: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean {
 
         // null 체크를 Repository에서 진행함으로써 중복 코드를 줄이고 뷰모델에서의 호출할때 자연스러운 코드 흐름으로 가독성을 가진다
-        if (userName == null || userPicture == null || postImage == null || postContent == null) {
+        if (userName == null || userGender == null || userPicture == null || postImage == null || postContent == null) {
             return false
         }
 
         // List<String>을 Repository에서 List<TagEntity>로 변환하지 않는 이유 : postId가 필요하며 데이터의 원자성을 보장하기 위해. 게시글을 추가하다 강제 종료되면 태그가 입력 안되는 등의 오류를 방지하기 위함
-        val postEntity = PostEntity(userName, userPicture, postImage, postContent, Date())
+        val postEntity = PostEntity(userName, userGender, userPicture, postImage, postContent, Date())
         postWithTagsAndCommentsDao.insertPostWithTags(postEntity, tagList)
         return true
     }
@@ -175,6 +175,6 @@ interface PostWithTagsAndCommentsRepository {
     fun getPostWithTagsAndCommentsList(keyword: String? = null): Flow<PagingData<PostWithTagsAndComments>>
     fun getPostWithTagsAndCommentsListByTag(keytag: String?): Flow<PagingData<PostWithTagsAndComments>>
     fun getPostWithTagsAndComments(postId: Int): Flow<PostWithTagsAndComments?>
-    suspend fun insertPostWithTags(userName: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean
+    suspend fun insertPostWithTags(userName: String?, userGender: String?, userPicture: Uri?, postImage: Uri?, postContent: String?, tagList: List<String>?): Boolean
     suspend fun deletePostWithTagsAndComments(postWithTagsAndComments: PostWithTagsAndComments?): Boolean
 }

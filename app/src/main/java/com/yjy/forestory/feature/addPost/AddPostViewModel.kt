@@ -1,7 +1,11 @@
 package com.yjy.forestory.feature.addPost
 
 import android.net.Uri
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.Event
@@ -83,11 +87,12 @@ class AddPostViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
 
-            // 사용자 이름과 프로필 사진을 가져오기.
+            // 사용자 이름과 프로필 사진, 그리고 성별 가져오기.
             val userName = userRepository.getUserName().firstOrNull()
             val userProfile = userRepository.getUserPicture().firstOrNull()
+            val userGender = userRepository.getUserGender().firstOrNull()
 
-            val result: Boolean = postWithTagsAndCommentsRepository.insertPostWithTags(userName, userProfile, uploadImage, uploadContent, uploadTags)
+            val result: Boolean = postWithTagsAndCommentsRepository.insertPostWithTags(userName, userGender, userProfile, uploadImage, uploadContent, uploadTags)
             _isCompleteInsert.value = Event(result)
             _isLoading.value = false
         }

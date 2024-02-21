@@ -9,7 +9,6 @@ import com.yjy.forestory.R
 import com.yjy.forestory.model.repository.PostWithTagsAndCommentsRepository
 import com.yjy.forestory.model.repository.SettingRepository
 import com.yjy.forestory.model.repository.TicketRepository
-import com.yjy.forestory.model.repository.UserRepository
 import com.yjy.forestory.util.ImageUtils
 import com.yjy.forestory.util.NotificationHelper
 import com.yjy.forestory.util.NotificationHelper.sendNewCommentNotification
@@ -22,12 +21,13 @@ class CommentWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val postWithTagsAndCommentsRepository: PostWithTagsAndCommentsRepository,
-    private val userRepository: UserRepository,
     private val settingRepository: SettingRepository,
     private val ticketRepository: TicketRepository
 ): CoroutineWorker(context, params) {
 
     companion object {
+        const val USER_NAME_KEY = "user_name"
+        const val USER_GENDER_KEY = "user_gender"
         const val PARENT_POST_ID_KEY = "parent_post_id"
         const val POST_CONTENT_KEY = "post_content"
         const val POST_IMAGE_KEY = "post_image"
@@ -47,8 +47,8 @@ class CommentWorker @AssistedInject constructor(
 
 
             // 댓글을 불러오는데 필요한 요소들 정의
-            val writerName = userRepository.getUserName().firstOrNull()
-            val writerGender = userRepository.getUserGender().firstOrNull()
+            val writerName = inputData.getString(USER_NAME_KEY)
+            val writerGender = inputData.getString(USER_GENDER_KEY)
             val postContent = inputData.getString(POST_CONTENT_KEY)
             val postImage = Uri.parse(inputData.getString(POST_IMAGE_KEY)).let {
                 ImageUtils.uriToMultipart(applicationContext, it)
