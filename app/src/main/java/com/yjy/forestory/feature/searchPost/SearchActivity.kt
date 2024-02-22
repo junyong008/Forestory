@@ -26,7 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SearchActivity: BaseActivity<ActivitySearchBinding>(R.layout.activity_search) {
 
     private val searchViewModel: SearchViewModel by viewModels()
-
+    private var isPostClickable = true
     override fun initViewModel() {
         binding.searchViewModel = searchViewModel
     }
@@ -159,12 +159,20 @@ class SearchActivity: BaseActivity<ActivitySearchBinding>(R.layout.activity_sear
     private val searchPostItemClickListener = object : SearchPostItemClickListener {
         // 포스트 클릭 리스너 재정의
         override fun onPostClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView) {
-            val intent = Intent(this@SearchActivity, PostActivity::class.java)
-            intent.putExtra("postId", postWithTagsAndComments.post.postId)
-            intent.putExtra("recursion", true) // 재귀 방지. 검색 -> 태그 클릭 -> 검색 -> 태그 클릭 ...
+            if (isPostClickable) {
+                isPostClickable = false
+                val intent = Intent(this@SearchActivity, PostActivity::class.java)
+                intent.putExtra("postId", postWithTagsAndComments.post.postId)
+                intent.putExtra("recursion", true) // 재귀 방지. 검색 -> 태그 클릭 -> 검색 -> 태그 클릭 ...
 
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this@SearchActivity, imageView, "postImage")
-            startActivity(intent, options.toBundle())
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this@SearchActivity,
+                    imageView,
+                    "postImage"
+                )
+                startActivity(intent, options.toBundle())
+                imageView.postDelayed({ isPostClickable = true }, 500L)
+            }
         }
 
         // 각 포스트 내의 태그 Chip 클릭 리스너 재정의 : 태그 재검색

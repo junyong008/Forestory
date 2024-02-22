@@ -25,6 +25,7 @@ import javax.inject.Inject
 class GridPostListFragment: BaseFragment<FragmentGridPostListBinding>(R.layout.fragment_grid_post_list) {
 
     @Inject lateinit var postViewModel: PostViewModel
+    private var isPostClickable = true
     private var recyclerViewScrollListener: RecyclerViewScrollListener? = null
 
     override fun initViewModel() {
@@ -72,11 +73,16 @@ class GridPostListFragment: BaseFragment<FragmentGridPostListBinding>(R.layout.f
     private val postItemClickListener = object : PostItemClickListener {
         // 이미지 클릭 리스너 재정의
         override fun onPostImageClicked(postWithTagsAndComments: PostWithTagsAndComments, imageView: ImageView) {
-            val intent = Intent(activity, PostActivity::class.java)
-            intent.putExtra("postId", postWithTagsAndComments.post.postId)
+            if (isPostClickable) {
+                isPostClickable = false
+                val intent = Intent(activity, PostActivity::class.java)
+                intent.putExtra("postId", postWithTagsAndComments.post.postId)
 
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), imageView, "postImage")
-            requireActivity().startActivity(intent, options.toBundle())
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), imageView, "postImage")
+                requireActivity().startActivity(intent, options.toBundle())
+
+                imageView.postDelayed({ isPostClickable = true }, 500L)
+            }
         }
 
         override fun onGetCommentClicked(postWithTagsAndComments: PostWithTagsAndComments) {}
