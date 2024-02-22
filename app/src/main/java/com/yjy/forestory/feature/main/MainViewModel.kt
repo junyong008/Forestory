@@ -2,6 +2,7 @@ package com.yjy.forestory.feature.main
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -52,7 +53,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // 메인 화면 인삿말 fold 여부
+    private val _isTitleFolded = MutableLiveData<Boolean?>(null)
+    val isTitleFolded: LiveData<Boolean?> get() = _isTitleFolded
 
+    fun foldTitle() {
+        _isTitleFolded.value = true
+    }
 
 
     // 데이터를 복원 혹은 백업 중인지

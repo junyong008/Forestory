@@ -46,7 +46,8 @@ import com.yjy.forestory.feature.backup.BackupActivity
 import com.yjy.forestory.feature.purchase.PurchaseActivity
 import com.yjy.forestory.feature.screenLock.ScreenLockSettingActivity
 import com.yjy.forestory.feature.searchPost.SearchActivity
-import com.yjy.forestory.feature.setting.*
+import com.yjy.forestory.feature.setting.LanguageSettingActivity
+import com.yjy.forestory.feature.setting.ThemeSettingActivity
 import com.yjy.forestory.feature.userProfile.UserProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -331,6 +332,11 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             binding.ibuttonAddPost.isVisible = (it > 0)
             binding.linearLayoutNoPost.isVisible = (it <= 0)
         }
+
+        // 메인 타이틀 Fold 여부
+        mainViewModel.isTitleFolded.observe(this) { isFolded ->
+            if(isFolded == true && !isAnimating) foldTitle()
+        }
     }
 
 
@@ -339,7 +345,6 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
 
     // 애니메이션에 필요한 변수 초기화
     private var isAnimating = false // 애니메이션이 보여지는 중인지
-    private var isFolded = false // 배너가 축소된 상황인지
     private val animationDuration: Long = 500 // 애니메이션 지속 시간
 
     private val bannerStartHeight by lazy { dpToPx(170f) }
@@ -366,9 +371,9 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
         }*/
 
         // 사용성 증대를 위해 처음 접속시 말고는 인사 메시지를 계속 보여줄 필요는 없다고 판단, 한번 스크롤을 내리면 더이상 펼치지 않음
-        if (scrollY != 0 && !isFolded) {
-            foldAnimation()
-            isFolded = true
+        if (scrollY != 0 && mainViewModel.isTitleFolded.value == null) {
+            foldTitleAnimation()
+            mainViewModel.foldTitle()
         }
     }
 
@@ -447,7 +452,21 @@ class MainActivity: BaseActivity<ActivityMainBinding>(R.layout.activity_main),
             }
         }
     }
-    private fun foldAnimation() {
+    private fun foldTitle() {
+        binding.imageViewIcon.visibility = View.INVISIBLE
+        binding.textViewInfo.visibility = View.INVISIBLE
+        binding.viewBanner.layoutParams.height = bannerTargetHeight
+        binding.tabLayout.layoutParams = (binding.tabLayout.layoutParams as ConstraintLayout.LayoutParams).apply {
+            startToStart = ConstraintLayout.LayoutParams.UNSET
+        }
+        binding.tabLayout.layoutParams = (binding.tabLayout.layoutParams as ViewGroup.MarginLayoutParams).apply {
+            height = tabLayoutTargetHeight
+            width = tabLayoutTargetWidth
+            topMargin = tabLayoutTargetMarginTop
+            marginEnd = tabLayoutTargetMarginEnd
+        }
+    }
+    private fun foldTitleAnimation() {
         val bannerWidthAnimator = ValueAnimator.ofInt(binding.viewBanner.height, bannerTargetHeight)
         val tabLayoutHeightAnimator = ValueAnimator.ofInt(binding.tabLayout.height, tabLayoutTargetHeight)
         val tabLayoutWidthAnimator = ValueAnimator.ofInt(binding.tabLayout.width, tabLayoutTargetWidth)
