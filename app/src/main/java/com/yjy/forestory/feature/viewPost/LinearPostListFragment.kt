@@ -58,7 +58,11 @@ class LinearPostListFragment: BaseFragment<FragmentLinearPostListBinding>(R.layo
         /* 리사이클러뷰 Adapter 등록, postItemClickListener 리스너를 등록하여 클릭 이벤트 처리
         왜 DialogFragment는 직접 인터페이스 리스너를 상속받아 override 했는가 하면.. -> 이건 Configuration Change가 발생하더라도 다시 onCreateView에서 어댑터를 연결하면서 리스너가 등록된다.
         DialogFragment는 onCreate에서 할당하는게 아니기에, 띄워져 있는 상태에서 CC 가 발생하면 리스너 등록이 안된다.*/
-        binding.recyclerViewPosts.adapter = PostAdapter(postItemClickListener, true)
+        binding.recyclerViewPosts.apply {
+            setItemViewCacheSize(30)
+            setHasFixedSize(true)
+            adapter = PostAdapter(postItemClickListener, true)
+        }
     }
 
     override fun setListener() {

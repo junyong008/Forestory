@@ -28,10 +28,8 @@ class CommentAdapter() : ListAdapter<Comment, CommentAdapter.MyViewHolder>(diffU
                 else -> R.drawable.ic_panda
             }
 
-            // 마지막 아이템인 경우 구분선을 숨김
-            if (isLastItem) binding.divider.visibility = View.GONE
-
             binding.circleImageViewWriterPicture.setImageResource(resourceId)
+            binding.divider.visibility = if (isLastItem) { View.GONE } else { View.VISIBLE }
         }
     }
 
