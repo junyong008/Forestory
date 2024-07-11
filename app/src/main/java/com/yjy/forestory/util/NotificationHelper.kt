@@ -6,7 +6,10 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
 import com.yjy.forestory.R
@@ -61,7 +64,12 @@ object NotificationHelper {
             .setOngoing(true)
             .build()
 
-        return ForegroundInfo(requestCode, notification)
+        // SDK 34 대응
+        return if (SDK_INT>= Q) {
+            ForegroundInfo(requestCode, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(requestCode, notification)
+        }
     }
 
     fun sendNewCommentNotification(context: Context, postId: Int, title: String, content: String) {
@@ -112,7 +120,12 @@ object NotificationHelper {
             .setOngoing(true)
             .build()
 
-        return ForegroundInfo(requestCode, notification)
+        // SDK 34 대응
+        return if (SDK_INT>= Q) {
+            ForegroundInfo(requestCode, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(requestCode, notification)
+        }
     }
 
     fun sendBackupCompleteNotification(context: Context, title: String) {
