@@ -1,5 +1,7 @@
 package com.yjy.forestory.model.network
 
+import com.google.gson.GsonBuilder
+import com.yjy.forestory.BuildConfig
 import com.yjy.forestory.Const.BASE_URL
 import com.yjy.forestory.model.network.api.CommentApi
 import okhttp3.OkHttpClient
@@ -10,12 +12,14 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // 로그 메시지의 포맷을 설정
     private val logger = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC  // 로그 레벨 BASIC
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.BASIC
+        }
     }
 
-    // OkHttpClient -> HTTP 통신의 결과를 로그 메시지로 출력
     private val client = OkHttpClient.Builder()
         .connectTimeout(300, TimeUnit.SECONDS)
         .readTimeout(300, TimeUnit.SECONDS)
@@ -23,16 +27,19 @@ object RetrofitClient {
         .addInterceptor(logger)
         .build()
 
+    private val gson = GsonBuilder()
+        .setLenient()
+        .create()
+
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
     val commentApi: CommentApi by lazy {
         retrofit.create(CommentApi::class.java)
     }
-
 }

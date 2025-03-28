@@ -1,6 +1,7 @@
 package com.yjy.forestory.model.repository
 
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -47,26 +48,18 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
     // Comment
     @WorkerThread
     override suspend fun addComments(parentPostId: Int?, writerName: String?, writerGender: String?, postContent: String?, language: String?, postImage: MultipartBody.Part?): Int {
-
         if (parentPostId == null || writerName == null || writerGender == null || postContent == null || language == null || postImage == null) {
             return 0
         }
 
         try {
-             /* Call 객체를 따로 사용하지 않은 이유
-             1. 중간에 요청 취소를 제공하지 않는다
-             2. 애초에 Repository 함수를 코루틴 비동기로 시행하기에 enqueue 를 이용한 비동기 시행이 필요 없다
-             3. try - catch HttpException으로 요청 실패를 충분히 핸들링 할 수 있다*/
-
-            // 이미지와 그 외 여러가지를 동시에 보내기에 @Multipart로 구현. 아니라면 @Body로 합치거나 @Field로 구현해도 된다
-            val commentDtoList: List<CommentDto> =
-                RetrofitClient.commentApi.getComments(
-                    writerName.toRequestBody("text/plain".toMediaTypeOrNull()),
-                    writerGender.toRequestBody("text/plain".toMediaTypeOrNull()),
-                    postContent.toRequestBody("text/plain".toMediaTypeOrNull()),
-                    language.toRequestBody("text/plain".toMediaTypeOrNull()),
-                    postImage
-                )
+            val commentDtoList: List<CommentDto> = RetrofitClient.commentApi.getComments(
+                writerName.toRequestBody("text/plain".toMediaTypeOrNull()),
+                writerGender.toRequestBody("text/plain".toMediaTypeOrNull()),
+                postContent.toRequestBody("text/plain".toMediaTypeOrNull()),
+                language.toRequestBody("text/plain".toMediaTypeOrNull()),
+                postImage
+            )
 
             if (commentDtoList.isEmpty()) {
                 return 404
@@ -77,42 +70,37 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
             }
 
             postWithTagsAndCommentsDao.insertCommentList(commentEntityList)
-
             return 200
-
         } catch (e: HttpException) {
+            Log.d("AddComments", "HttpException: $e")
             e.printStackTrace()
 
             return e.code()
+        } catch (e: Exception) {
+            Log.d("AddComments", "Exception: $e")
+            e.printStackTrace()
+
+            return 500
         }
     }
 
-
-
-    // Tag
     @WorkerThread
     override suspend fun getTagList(keyword: String): List<Tag> {
         return postWithTagsAndCommentsDao.getTagList(keyword).map { it.toTag() }
     }
 
-
-
-    // Transaction
     override fun getPostWithTagsAndCommentsList(keyword: String?): Flow<PagingData<PostWithTagsAndComments>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 15, // 페이지당 불러올 항목 갯수
-                enablePlaceholders = false // 미리 모든 항목들을 불러와서 null처리 해둘것 인지.
-                /*
-                initialLoadSize = 기본값(pageSize * 3) : 초기 데이터 로드시 한번에 가져올 항목갯수. pageSize보다 작게 설정한다면 pageSize로 대체됨
-                prefetchDistance = 기본값(pageSize) : RecyclerView가 아이템을 미리 가져와야 하는 거리
-                 */
+                pageSize = 15,
+                enablePlaceholders = false,
             ),
             pagingSourceFactory = {
                 postWithTagsAndCommentsDao.getPostWithTagsAndCommentsList(keyword)
             }
-        ).flow
-            .map { pagingData -> pagingData.map { entity -> entity.toPostWithTagsAndComments() } }
+        ).flow.map { pagingData ->
+            pagingData.map { entity -> entity.toPostWithTagsAndComments() }
+        }
     }
 
     override fun getPostWithTagsAndCommentsListByTag(keytag: String?): Flow<PagingData<PostWithTagsAndComments>> {
@@ -124,12 +112,13 @@ class PostWithTagsAndCommentsRepositoryImpl(private val postWithTagsAndCommentsD
             pagingSourceFactory = {
                 postWithTagsAndCommentsDao.getPostWithTagsAndCommentsListByTag(keytag)
             }
-        ).flow
-            .map { pagingData -> pagingData.map { entity -> entity.toPostWithTagsAndComments() } }
+        ).flow.map { pagingData ->
+            pagingData.map { entity -> entity.toPostWithTagsAndComments() }
+        }
     }
 
     override fun getPostWithTagsAndComments(postId: Int): Flow<PostWithTagsAndComments?> {
-        return postWithTagsAndCommentsDao.getPostWithTagsAndComments(postId).map { it?.toPostWithTagsAndComments() }
+        return postWithTagsAndCommentsDao.getPostWithTagsAndComments(postId).map { it.toPostWithTagsAndComments() }
     }
 
     @WorkerThread
