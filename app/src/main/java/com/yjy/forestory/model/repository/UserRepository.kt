@@ -65,8 +65,6 @@ class UserRepositoryImpl(private val context: Context): UserRepository {
     }
 }
 
-
-
 interface UserRepository {
     fun getUserName(): Flow<String?>
     suspend fun setUserName(userName: String)

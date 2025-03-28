@@ -59,8 +59,6 @@ class AddPostActivity: BaseActivity<ActivityAddPostBinding>(R.layout.activity_ad
         }
 
         binding.ibuttonAddPhoto.setOnClickListener {
-
-            // 기존 사진이 존재한다면 삭제할건지 다이얼로그 제공 아니라면 카메라 or 갤러리 선택 다이얼로그 제공
             if (addPostViewModel.currentPhoto.value != null) {
                 ConfirmDialog.newInstance(getString(R.string.confirm_delete_photo), CONFIRM_DIALOG_CODE_DELETE_PHOTO).show(supportFragmentManager, ConfirmDialog.TAG)
             } else {
