@@ -19,19 +19,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.github.logansdk.permission.PermissionManager
-import com.theartofdev.edmodo.cropper.CropImage
-import com.theartofdev.edmodo.cropper.CropImageView
 import com.yjy.forestory.Const.GENDER_FEMALE
 import com.yjy.forestory.Const.GENDER_MALE
 import com.yjy.forestory.Const.PRIVACY_POLICY_URL
 import com.yjy.forestory.R
 import com.yjy.forestory.base.BaseActivity
 import com.yjy.forestory.databinding.ActivityUserProfileBinding
+import com.yjy.forestory.feature.crop.CropActivity
+import com.yjy.forestory.feature.crop.CropActivity.Companion.EXTRA_CROPPED_URI
 import com.yjy.forestory.feature.main.MainActivity
 import com.yjy.forestory.util.CameraGalleryDialog
 import com.yjy.forestory.util.CameraGalleryDialogInterface
 import com.yjy.forestory.util.ImageUtils
+import com.yjy.forestory.util.getParcelableCompat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,7 +51,6 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
 
     override val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-
             finish()
             if (isFirstSet) {
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
@@ -59,11 +61,8 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
     }
 
     override fun initView(savedInstanceState: Bundle?) {
-
-        // 초기 설정인지 확인. 초기 설정이라면 확인버튼을 누를때 바로 MainActivity로 이동하게끔 한다
         isFirstSet = intent.getBooleanExtra("isFirstSet", false)
 
-        // 초기 설정이라면 확인시 개인정보 처리방침에 동의하게됨을 알림
         if (isFirstSet) {
             val spannable = SpannableString(getString(R.string.click_confirm_to_agree_privacy_policy))
             val highlightText = getString(R.string.highlight_privacy_policy)
@@ -94,31 +93,25 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
     }
 
     override fun setListener() {
-
-        // 뒤로가기 버튼 클릭
         binding.ibuttonClose.setOnClickListener {
             onBackPressedCallback.handleOnBackPressed()
         }
 
-        // 프로필 사진 편집
         binding.circleImageViewAddPhoto.setOnClickListener {
             CameraGalleryDialog().show(supportFragmentManager, CameraGalleryDialog.TAG)
         }
 
-        // 남성 or 여성 선택
         binding.chipMale.setOnClickListener {
             userProfileViewModel.setCurrentGender(GENDER_MALE)
         }
+
         binding.chipFemale.setOnClickListener {
             userProfileViewModel.setCurrentGender(GENDER_FEMALE)
         }
 
-        // 확인 버튼 클릭
         binding.buttonConfirm.setOnClickListener {
-
             var uploadImage: Uri? = userProfileViewModel.currentUserPicture.value
 
-            // 프로필 사진을 설정하지 않았다면 기본 프로필 사진을 따로 저장하여 설정
             uploadImage = if (uploadImage == null) {
                 val defaultUserImage: Uri = Uri.parse("android.resource://$packageName/${R.drawable.ic_user}")
                 ImageUtils.saveUserProfileToInternalStorage(this, defaultUserImage)
@@ -136,17 +129,13 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
     }
 
     override fun onCameraClick() {
-
-        // 안드로이드 10부터는 WRITE/READ 권한 요청 필요 없음
-        val permissions =
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                arrayOf(Manifest.permission.CAMERA)
-            } else {
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
+        val permissions = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            arrayOf(Manifest.permission.CAMERA)
+        } else {
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
 
         PermissionManager.with(this, permissions).check { granted, _, _ ->
-
             if (granted.size == permissions.size) {
                 tempCameraUri = ImageUtils.createTempImageFile(this)
                 tempCameraUri?.let {
@@ -159,13 +148,13 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
             }
         }
     }
+
     override fun onGalleryClick() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
         selectPhotoResultLauncher.launch(intent)
     }
 
-    // 사진을 촬영하거나 갤러리에서 선택 된 후 결과 도착
     private val selectPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -181,32 +170,34 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
 
             // 정상적으로 촬영 or 선택된 이미지가 넘어왔으면 Crop 실행
             resultUri?.let {
-                val intent = CropImage.activity(it)
-                    .setInitialCropWindowPaddingRatio(0F) // 처음 Crop 사이즈 : 꽉 채우기
-                    .setOutputCompressQuality(100) // 결과물 압축률 : 원본 유지
-                    .setGuidelines(CropImageView.Guidelines.ON) // 가이드라인 : true
-                    .setCropShape(CropImageView.CropShape.OVAL) // Crop 모양 : 원
-                    .setAspectRatio(1, 1)
-                    .getIntent(baseContext)
-                cropPhotoResultLauncher.launch(intent)
+                val cropOptions = CropImageOptions().apply {
+                    initialCropWindowPaddingRatio = 0f
+                    outputCompressQuality = 100
+                    guidelines = CropImageView.Guidelines.ON
+                    cropShape = CropImageView.CropShape.OVAL
+                    aspectRatioX = 1
+                    aspectRatioY = 1
+                    fixAspectRatio = true
+                }
+
+                val cropIntent = Intent(this, CropActivity::class.java).apply {
+                    putExtra(CropActivity.EXTRA_IMAGE_URI, it)
+                    putExtra(CropActivity.EXTRA_CROP_OPTIONS, cropOptions)
+                }
+
+                cropImageLauncher.launch(cropIntent)
             }
         }
     }
 
-    // 사진 Crop 후 결과 도착
-    private val cropPhotoResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            CropImage.getActivityResult(result.data).uri?.let {
-                userProfileViewModel.setCurrentPicture(it)
-            }
-        }
+    private val cropImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        result.takeIf { it.resultCode == Activity.RESULT_OK }
+            ?.data
+            ?.getParcelableCompat<Uri>(EXTRA_CROPPED_URI)
+            ?.let(userProfileViewModel::setCurrentPicture)
     }
 
     override fun setObserver() {
-
-        // 프로필 사진과 이름은 각각 바인딩 어댑터, 양방향 바인딩으로 연결됨. 성별만 따로 아래와 같이 연결
-
-        // 현재 성별
         userProfileViewModel.currentUserGender.observe(this) { gender ->
             when(gender) {
                 GENDER_MALE -> {
@@ -222,8 +213,6 @@ class UserProfileActivity: BaseActivity<ActivityUserProfileBinding>(R.layout.act
     }
 
     override fun setEventObserver() {
-
-        // 프로필 수정을 완료했을때
         userProfileViewModel.isCompleteConfirmProfile.observe(this, EventObserver {
             if (isFirstSet) {
                 val intent = Intent(this@UserProfileActivity, MainActivity::class.java)

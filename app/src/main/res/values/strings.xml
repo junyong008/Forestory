@@ -5,6 +5,7 @@
     <string name="max_tag_count_hint">Tag input (up to %d)</string>
     <string name="enter_content_hint">Enter the content</string>
     <string name="write_text">Write</string>
+    <string name="crop_image">Crop</string>
     <string name="title_image_zoom">View Details</string>
     <string name="title_post">Post</string>
     <string name="notify_forest_friends">Notify Forest Friends</string>

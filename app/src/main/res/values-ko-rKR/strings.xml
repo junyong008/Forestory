@@ -6,6 +6,7 @@
     <string name="max_tag_count_hint">태그 입력 (최대 %d개)</string>
     <string name="enter_content_hint">내용을 입력하세요</string>
     <string name="write_text">작성하기</string>
+    <string name="crop_image">자르기</string>
     <string name="title_image_zoom">자세히 보기</string>
     <string name="title_post">게시글</string>
     <string name="notify_forest_friends">숲속 친구들에게 알리기</string>
